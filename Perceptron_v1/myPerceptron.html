@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<link rel="stylesheet" href="myPerceptron.css">
+
+<h1>Two Perceptrons is Better Than One</h1>
+<h2>INFX574: DataSci meets INFX598: DataVis</h2>
+<h3>Perceptron: what is it?</h3>
+<p>The perceptron is a mathematical model of a biological neuron. While in actual neurons the dendrite receives electrical signals from the axons of other neurons, in the perceptron these electrical signals are represented as numerical values. At the synapses between the dendrite and axons, electrical signals are modulated in various amounts. This is also modeled in the perceptron by multiplying each input value by a value called the weight. An actual neuron fires an output signal only when the total strength of the input signals exceed a certain threshold. We model this phenomenon in a perceptron by calculating the weighted sum of the inputs to represent the total strength of the input signals, and applying a step function on the sum to determine its output. As in biological neural networks, this output is fed to other perceptrons.</p>
+<table class="noBorder">
+  <tr>
+    <td>
+      <img src="img/bioneuron.jpg" alt=" A biological neuron">
+    </td>
+    <td>
+      <img src="img/artificial.jpg" alt="An artificial neuron (perceptron)">
+    </td>
+  </tr>
+  <tr>
+    <td>
+      A biological neuron
+    </td>
+    <td>
+      An artificial neuron (perceptron)
+    </td>
+  </tr>
+</table>
+<br><br>
+<h3>What Can a perceptron do?</h3>
+  A perceptron calculates the weighted sum of the input values.  Let's assume two input values, x and y for a certain perceptron P. Let the weights for x and y be A and B for respectively, the weighted sum could be represented as: A x + B y.  Since the perceptron outputs an non-zero value only when the weighted sum exceeds a certain threshold C, one can write down the output of this perceptron as follows:<p>
+
+<table class="noBorder">
+  <tr>
+    <td>
+      Output of P =
+    </td>
+    <td>
+      {1 if A x + B y > C
+    </td>
+  </tr>
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+      &nbsp;&nbsp;&nbsp;{0 if A x + B y < = C
+    </td>
+  </tr>
+</table>
+<br><br>
+<h3>Single Perceptron meets Truth table</h3>
+This result is useful because it turns out that some logic functions such as the boolean AND, OR and NOT operators are linearly separable, i.e. they can be performed using a single perceprton.
+<br><br>
+<div id='container'>
+  <div id='sections'>
+    <div>
+    &nbsp;  
+    </div>
+
+    <div>
+      <h3>Single Perceptron and AND</h3>
+      <table width=80% align="center" border=1 >
+      <tr bgcolor="orange">
+        <td>
+          x1
+        </td>
+        <td>
+          x2
+        </td>
+        <td>
+          y
+        </td>
+      </tr>
+      <tr>
+        <td>
+          1
+        </td>
+        <td>
+          1
+        </td>
+        <td>
+          1
+        </td>
+      </tr>
+      <tr>
+        <td>
+          1
+        </td>
+        <td>
+          0
+        </td>
+        <td>
+          -1
+        </td>
+      </tr>
+      <tr>
+        <td>
+          0
+        </td>
+        <td>
+          1
+        </td>
+        <td>
+          -1
+        </td>
+      </tr>
+      <tr>
+        <td>
+          0
+        </td>
+        <td>
+          0
+        </td>
+        <td>
+          -1
+        </td>
+      </tr>
+    </table>
+    </div>
+
+    <!--div>
+      temp place holder
+    </div>
+
+    <div>
+      <h3>Sticky graph</h3>
+      When the graph scrolls out of view...
+    </div-->
+
+  </div>
+
+  <div id='graph'></div>
+</div>
+
+<!--h1>Multiple graphs</h1-->
+
+<div id='container2'>
+  <div id='sections2'>
+    <div>
+      <br>
+    </div>
+    <div>
+      <h3>Single Perceptron and OR</h3>
+      <table width=80% align="center" border=1 >
+      <tr bgcolor="orange">
+        <td>
+          x1
+        </td>
+        <td>
+          x2
+        </td>
+        <td>
+          y
+        </td>
+      </tr>
+      <tr>
+        <td>
+          1
+        </td>
+        <td>
+          1
+        </td>
+        <td>
+          1
+        </td>
+      </tr>
+      <tr>
+        <td>
+          1
+        </td>
+        <td>
+          0
+        </td>
+        <td>
+          1
+        </td>
+      </tr>
+      <tr>
+        <td>
+          0
+        </td>
+        <td>
+          1
+        </td>
+        <td>
+          1
+        </td>
+      </tr>
+      <tr>
+        <td>
+          0
+        </td>
+        <td>
+          0
+        </td>
+        <td>
+          -1
+        </td>
+      </tr>
+    </table>
+    </div>
+  
+  </div>
+
+  <div id='graph2'></div>
+
+</div>
+
+<div id='container3'>
+  <div id='sections3'>
+    <div>
+      <br>
+    </div>
+    <div>
+      <h3>Single Perceptron Geometrically</h3>
+      Recall that A x + B y > C and A x + B y < C are the two regions on the xy plane separated by the line A x + B y + C = 0. If we consider the input (x, y) as a point on a plane, then the perceptron actually tells us which region on the plane to which this point belongs. Such regions, since they are separated by a single line, are called linearly separable regions.
+    </div>
+
+    <div>
+      temp place holder
+    </div>
+
+    <div>
+      <h3>Sticky graph</h3>
+      When the graph scrolls out of view...
+    </div>
+
+    <div>
+      <h3>Citations</h3>
+      <p>
+        <a href='https://cs.stanford.edu/people/eroberts/courses/soco/projects/neural-networks/Neuron/index.html/'>Neural Networks</a>
+      </p>
+      <p><a href='http://bost.ocks.org/mike/scroll/'>How To Scroll</a></p>
+    </div>
+
+    <div>
+      <h3>Todos</h3>
+      <p>- Draw graph 3 - scatter plot of AND and scatter plot of OR
+      <p>- Show how Perceptron can't solve XOR table
+      <p>- Layer 2 Perceptrons to solve XOR problem 
+    </div>
+  </div>
+
+  <div id='graph3'></div>
+
+</div>
+
+<!-- libraries -->
+<script src="d3.v3.js"></script>
+<script src="graph-scroll.js"></script>
+<script type="text/javascript" src="myPerceptron.js"></script>
