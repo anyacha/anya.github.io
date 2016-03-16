@@ -1,0 +1,219 @@
+
+body{
+  width: 900px;
+  margin: 0px auto;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+text {
+    font-size: 18px;
+}
+
+svg{
+  //background-color: #eee;
+  background-color: white;
+}
+
+img{
+    width: 500px;
+}
+
+image {
+    height: 50px;
+    width: 60px;
+  }
+.image-border {
+    fill: white;
+    height: 50px;
+    width: 60px;
+    stroke: grey;
+    shape-rendering: crispEdges;
+  }
+
+.graph-text {
+  font-size: 18px;
+  opacity: .6;
+}
+.graph-text-oversized {
+  font-size: 36px;
+  opacity: .6;
+}
+
+label { display: inline; width: 500px; }
+
+#result_label, #result_msg {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  color: red; 
+  border: none; 
+  border-color: transparent; 
+  width: 100%;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+    #border: 3px solid grey;
+    text-align: center;
+}
+
+table.noBorder {
+    border: 0;
+}
+
+table { border-collapse: collapse; border: 1px solid #CCB; width: 100%; }
+table td, th { padding: 5px; border: 1px solid #E0E0E0; }
+table  th { background: #E5E5E5; text-align: center; }
+.highlight { background: #E1EAF1; } 
+    
+
+line {
+    stroke: black;
+}
+
+
+
+
+
+    
+
+
+#container, #container2, #container3 {
+  position: relative;
+  width: 100%;
+  overflow: auto;
+}
+
+#sections, #sections2, #sections3 {
+  width: 340px;
+  float: left;
+}
+
+#sections > div, #sections2 > div, #sections3 > div{
+  background: white;
+  opacity: .2;
+  margin-bottom:120px;
+}
+
+#sections > div.graph-scroll-active, #sections2 > div.graph-scroll-active, #sections3 > div.graph-scroll-active{
+  opacity: 1;
+}
+
+#graph, #graph2, #graph3{
+  float: left;
+  //margin-left: 20px;
+}
+
+#graph.graph-scroll-fixed, #graph2.graph-scroll-fixed, #graph3.graph-scroll-fixed{
+  position: fixed;
+  top: 0px;
+  margin-left: 380px;
+}
+
+#graph.graph-scroll-below, #graph2.graph-scroll-below, #graph3.graph-scroll-below {
+  position: absolute;
+  bottom: 0px;
+  margin-left: 380px;
+}
+
+
+.circle_static {
+  stroke: #000;
+}
+
+.circle_dynamic {
+  stroke: #000;
+}
+
+.connecting_line{
+    stroke: grey;
+    stroke-width: 2;
+    /*background-origin: back;
+    z-index: -1;*/
+}
+
+.axis line,
+.axis text {
+  font: 11px sans-serif;
+}
+.axis path {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+h1{
+  margin: 20px;
+}
+h1, h2{
+  text-align: center;
+}
+h3{
+  text-align: left;
+}
+h2{
+  color:blue;
+  opacity: .6;
+}
+
+/* was - $acdelete 
+
+input.invalid { background: red; color: #FDFDFD; }
+.reg {
+    stroke: steelblue;
+    stroke-width: 2;
+}
+
+body{
+  width: 900px;
+  margin: 0px auto;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+img{
+    width: 500px;
+}
+
+#container, #container2{
+  position: relative;
+  width: 100%;
+  overflow: auto;
+}
+    #sections {
+  position: relative;
+  display: inline-block;
+  width: 350px;
+}
+
+#vis {
+  display: inline-block;
+  position: fixed;
+  top: 60px;
+  
+  height: 600px;
+  width: 300px;
+  margin-left:20px;
+  border:1px solid gray;
+}
+
+
+// increase the font size for the title class
+.title {
+  font-size:30px;
+}
+
+// Give the step class a margin bottom of 300px 
+.step {
+  margin-bottom:300px;
+*/
+/*circle{
+  fill: steelblue;
+
+
+.mono{
+  font-family: monospace;
+}}*/
+
+}
