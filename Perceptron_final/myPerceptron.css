@@ -1,0 +1,185 @@
+
+body{
+  width: 900px;
+  margin: 0px auto;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+h1{
+  margin: 20px;
+}
+h1, h2{
+  text-align: center;
+}
+h3{
+  text-align: left;
+}
+h2{
+  color:blue;
+  opacity: .8;
+}
+
+img{
+    width: 500px;
+}
+
+table {
+    border-collapse: collapse; border: 1px solid #CCB; width: 80%;
+    table-layout: fixed;
+}
+table, th, td {
+    #border: 3px solid grey;
+    text-align: center;
+}
+table  th { 
+  background: #FFA500; 
+  text-align: center; 
+}
+.table_highlight { background: #E1EAF1; } 
+
+
+table.noBorder {
+    border: 0;
+}
+
+.text_highlight {
+  font-weight: bolder;
+  font-size: 20px;
+  color:blue;
+  opacity: .8;
+}
+
+/*$ac fix*/
+.text_red {
+  color: red;
+}
+.text_blue {
+  color: blue;
+  opacity: .8;
+}
+.text_credits {
+  color: #737CA1;
+  opacity: .8;
+}
+
+svg{
+  //background-color: #eee;
+  background-color: white;
+}
+
+#container, #container2 {
+  position: relative;
+  width: 100%;
+  overflow: auto;
+}
+
+#sections, #sections2 {
+  width: 340px;
+  float: left;
+}
+
+#sections > div, #sections2 > div {
+  background: white;
+  opacity: .2;
+  margin-bottom:120px;
+}
+
+#sections > div.graph-scroll-active, #sections2 > div.graph-scroll-active {
+  opacity: 1;
+}
+
+
+#graph, #graph2{
+  float: left;
+  margin-left: 40px;
+}
+
+#graph3{
+  float: left;
+  margin-left: 0px;
+}
+
+#graph.graph-scroll-fixed, #graph2.graph-scroll-fixed {
+  position: fixed;
+  top: 0px;
+  margin-left: 380px;
+}
+
+#graph.graph-scroll-below, #graph2.graph-scroll-below {
+  position: absolute;
+  bottom: 0px;
+  margin-left: 380px;
+}
+
+image {
+    height: 50px;
+    width: 60px;
+  }
+.image-border {
+    fill: white;
+    height: 50px;
+    width: 60px;
+    stroke: grey;
+    shape-rendering: crispEdges;
+  }
+.image-sm {
+    height: 35px;
+    width: 45px;
+  }
+.image-sm-border {
+    fill: white;
+    height: 35px;
+    width: 45px;
+    stroke: grey;
+    shape-rendering: crispEdges;
+  }
+
+.graph-text {
+  font-size: 18px;
+  opacity: .6;
+}
+.graph-text-mediumsized {
+  font-size: 32px;
+  opacity: .6;
+}
+.graph-text-oversized {
+  font-size: 44px;
+  opacity: .6;
+}
+
+label { display: inline; width: 500px; }
+
+#compute, #peek, #reset {
+  background: #E1EAF1;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+#result_label, #result_msg {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  color: red; 
+  border: none; 
+  border-color: transparent; 
+  width: 100%;
+}
+
+.circle_static {
+  stroke: #000;
+}
+
+.circle_dynamic {
+  stroke: #000;
+}
+
+.connecting_line{
+    stroke: grey;
+    stroke-width: 2;
+    
+}
+
+/*circle{
+  fill: steelblue;*/
+
+
+}

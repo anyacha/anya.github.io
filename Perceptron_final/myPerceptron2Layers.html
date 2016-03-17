@@ -1,0 +1,778 @@
+<!--project: my Perceptron - Anya Chaliotis -->
+<!--work for UW, iSchool, INFX598 Advanced Data Vis, taught by Jessica Hullman -->
+<!--inspired by INFX574 DataSciII, taught by Joshua Blumenstock -->
+
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My Perceptron - Two Layers</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="stylesheet" href="myPerceptron.css">
+        <script type="text/javascript" src="d3.v3.min.js" charset="utf-8"></script>
+</head>
+
+<body>
+<h1>Perceptron with 2 Layers Can Solve XOR problem</h1>
+<a href="myPerceptron.html">Back to My Perceptron Visualized</a> <br><br>
+An interactive exploration of how 2 layers of perceptron can overcome the XOR problem.  To operate, we set some defaults for you.  Feel free to pick a row from the truth table, play with weights and thresholds.  We use <span style="color:red;">red</span> and <span style="color:blue;">blue</span> to represent boolean values of <span style="color:red;">1-True</span> and <span style="color:blue;">0-False </span>respectively. <span style="color:orange;">Orange</span> is used for the intermediate steps between taking inputs and producing an output.<br><br>
+Remember: Perceptron is considered successful if it can correctly classify output for all four truth pairs with the same input parameters (weights and threshold).  Otherwise, it's not successful.<br><br>
+<div>
+    <div style="width: 30%; float: left;" >
+        <div id="perceptron_controls">Selected Truth Mode: 
+        <input type="radio" name="truth_mode" id="input_truth_XOR" value="XOR" checked onchange="change_truth();">XOR</br></br>
+        Select a row for Perceptron to compute: 
+        (or default first row)</br>
+        <div id="truth_table"></div></br>
+        <label>Weight 1 = </label>
+        <input type="text" id="input_weight1" size=4 value="1" onchange="change_weight1()"><br>
+        <label>Weight 2 = </label>
+        <input type="text" id="input_weight2" size=4 value="1" onchange="change_weight2()"><br>
+        <label>Weight 3 = </label>
+        <input type="text" id="input_weight3" size=4 value="1" onchange="change_weight3()"><br>
+        <label>Weight 4 = </label>
+        <input type="text" id="input_weight4" size=4 value="1" onchange="change_weight4()"><br>
+        <label>Weight 5 = </label>
+        <input type="text" id="input_weight5" size=4 value="" onchange="change_weight5()"><br>
+        <label>Weight 6 = </label>
+        <input type="text" id="input_weight6" size=4 value="" onchange="change_weight6()"><br>
+        <label>Weight 7 = </label>
+        <input type="text" id="input_weight7" size=4 value="" onchange="change_weight7()"><br>
+        
+        <label>Threshold1 = </label>
+        <input type="text" id="input_threshold1" size=4 value="0" onchange="change_threshold1()"><br>
+        <label>Threshold2 = </label>
+        <input type="text" id="input_threshold2" size=4 value="0" onchange="change_threshold2()"><br>
+        <label>Threshold3 = </label>
+        <input type="text" id="input_threshold3" size=4 value="0" onchange="change_threshold3()"><br>
+        <label>Threshold final= </label>
+        <input type="text" id="input_threshold_final" size=4 value="0" onchange="change_threshold_final()"><br>
+        </div><br/>
+        <label class="result_msg">We prefilled first 4 inputs for you. <br> Try on your own!<label> <br> <br>
+        <input type="button" id="compute" value="Compute" onclick="state2l_original=0; compute2lUnit(data2l_truthPair);"></br></br>
+
+        <label class="result_msg">  Or you can peek at one of possible solutions...</label><br><br>
+        <input type="button" id="peek" value="Peek" onclick="peekAtSolution();">&nbsp; &nbsp;
+        <input type="button" id="reset" value="Reset Input" onclick="resetInput();"></br><br>
+        
+        <input type="text" id="result_label"></br>
+        <input type="text" id="result_msg"></br><br></br><br></br><br></br><br></br><br>
+    </div>
+    <div id="graph" style="width: 70%; float: right; margin-left: 0px;"></div><!--overwrite css to work-->
+</div>
+<script type="text/javascript">
+
+/**************************************** part 0. DECLARE VARIABLES AND DATA ***************************************************/
+    var svg, w2l_1,w2l_2, w2l_3, w2l_4, w2l_5, w2l_6, w2l_7, threshold2l_final, threshold2l_1, threshold2l_2, threshold2l_3, state2l_original=0, data, table;
+    var circles2l, circles2l_static, circles2l_dynamic, radius_sm=30, radius_med=40, radius_lg=50, labels2l, labels2l_static, labels2l_dynamic;
+    
+    var data2l_orig= { x1_init: -1, x2_init: -1, w_sum1_hid: -1, w_sum2_hid: -1, w_sum3_hid: -1, w_sum_master: -1, y_out: -1};
+    var data2l_init= d3.values(data2l_orig)
+    var text2l_init = ["x1","x2", "w1", "w2", "w3", "w4", "Σ","Σ","Σ", "w5", "w6", "w7", "Σ", "y", "inputs", "weights: 1st round", "weighted sums", "step functions:", "Σ > thresholds 1,2,3 ", "weights: 2nd round", "master weighted sum", "master step function:","Σ > threshold final", "output"]; 
+
+    //truth table(s)
+    var columns = [ "x1", "x2", "y"];
+    var truth_fn;
+
+    var truth_AND = [
+        { x1: 1, x2: 1, y: 1 },
+        { x1: 1, x2: 0, y: 0 },
+        { x1: 0, x2: 1, y: 0 },
+        { x1: 0, x2: 0, y: 0 }
+    ];
+
+    var truth_OR = [
+        { x1: 1, x2: 1, y: 1 },
+        { x1: 1, x2: 0, y: 1 },
+        { x1: 0, x2: 1, y: 1 },
+        { x1: 0, x2: 0, y: 0 }
+    ];
+
+    var truth_XOR = [
+        { x1: 1, x2: 1, y: 0 },
+        { x1: 1, x2: 0, y: 1 },
+        { x1: 0, x2: 1, y: 1 },
+        { x1: 0, x2: 0, y: 0 }
+    ];
+
+    var selected_row_idx, selected_truth_mode;
+    var truthTuple = null; //data format tuple { x1: 1, x2: 0} -> { x1: 1, x1hid: 1, x2: 0, x2hid: 0};
+    var truthTuple_array, truthTuple2l_array, truth_output;
+    var data2l_truthPair; //data format array []
+    
+/**************************************** end part 0. DECLARE VARIABLES AND DATA ***************************************************/
+
+/**************************************** part 2. PROCESS INPUT ***************************************************/
+
+    function change_weight1() {
+        w2l_1 = +d3.select("#input_weight1").node().value;
+    }
+    function change_weight2() {
+        w2l_2 = +d3.select("#input_weight2").node().value;
+    }
+    function change_weight3() {
+        w2l_3 = +d3.select("#input_weight3").node().value;
+    }
+    function change_weight4() {
+        w2l_4 = +d3.select("#input_weight4").node().value;
+    }
+    function change_weight5() {
+        w2l_5 = +d3.select("#input_weight5").node().value;
+    }
+    function change_weight6() {
+        w2l_6 = +d3.select("#input_weight6").node().value;
+    }
+    function change_weight7() {
+        w2l_7 = +d3.select("#input_weight7").node().value;
+    }
+
+    function change_threshold_final() {
+        threshold2l_final = +d3.select("#input_threshold_final").node().value;
+    }
+    function change_threshold1() {
+        threshold2l_1 = +d3.select("#input_threshold1").node().value;
+    }
+    function change_threshold2() {
+        threshold2l_2 = +d3.select("#input_threshold2").node().value;
+    }
+    function change_threshold3() {
+        threshold2l_3 = +d3.select("#input_threshold3").node().value;
+    }
+
+
+    function change_truth() {
+        truth_fn =  d3.select('input[name="truth_mode"]:checked').node().value
+        console.log("truth selected: ", truth_fn);
+        if (truth_fn == "XOR") {
+          //reset 
+          //selected_row_idx = null;
+          selected_truth_mode="XOR"
+          reset2l();
+          //remove all table
+          d3.select("#truth_table").selectAll("table").remove();
+          
+          //add truth table as input for selecting truth pairs
+          var table=tabulate_and_rowIdx(truth_XOR, columns);
+
+          //default weights and threshold
+          d3.select("#input_weight1").node().value=1
+          w2l_1 = +d3.select("#input_weight1").node().value;
+          d3.select("#input_weight2").node().value=1
+          w2l_2 = +d3.select("#input_weight2").node().value;
+          d3.select("#input_weight3").node().value=1
+          w2l_3 = +d3.select("#input_weight3").node().value;
+          d3.select("#input_weight4").node().value=1
+          w2l_4 = +d3.select("#input_weight4").node().value;
+          d3.select("#input_weight5").node().value=""
+          w2l_5 = +d3.select("#input_weight5").node().value;
+          d3.select("#input_weight6").node().value=""
+          w2l_6 = +d3.select("#input_weight6").node().value;
+          d3.select("#input_weight7").node().value=""
+          w2l_7 = +d3.select("#input_weight7").node().value;
+
+          d3.select("#input_threshold_final").node().value=""
+          threshold2l_final = +d3.select("#input_threshold_final").node().value;
+          d3.select("#input_threshold1").node().value=""
+          threshold2l_1 = +d3.select("#input_threshold1").node().value;
+          d3.select("#input_threshold2").node().value=""
+          threshold2l_2 = +d3.select("#input_threshold2").node().value;
+          d3.select("#input_threshold3").node().value=""
+          threshold2l_3 = +d3.select("#input_threshold3").node().value;
+
+        }
+    }
+    
+    change_weight1();
+    change_weight2();
+    change_weight3();
+    change_weight4();
+    change_weight5();
+    change_weight6();
+    change_weight7();
+    change_threshold_final();
+    change_threshold1();
+    change_threshold2();
+    change_threshold3();
+    change_truth();
+
+    function peekAtSolution() {
+      d3.select("#input_weight1").node().value=1
+      w2l_1 = +d3.select("#input_weight1").node().value;
+      d3.select("#input_weight2").node().value=1
+      w2l_2 = +d3.select("#input_weight2").node().value;
+      d3.select("#input_weight3").node().value=1
+      w2l_3 = +d3.select("#input_weight3").node().value;
+      d3.select("#input_weight4").node().value=1
+      w2l_4 = +d3.select("#input_weight4").node().value;
+      d3.select("#input_weight5").node().value=1
+      w2l_5 = +d3.select("#input_weight5").node().value;
+      d3.select("#input_weight6").node().value=-2
+      w2l_6 = +d3.select("#input_weight6").node().value;
+      d3.select("#input_weight7").node().value=1
+      w2l_7 = +d3.select("#input_weight7").node().value;
+
+      d3.select("#input_threshold_final").node().value=0.5
+      threshold2l_final = +d3.select("#input_threshold_final").node().value;
+      d3.select("#input_threshold1").node().value=0.5
+      threshold2l_1 = +d3.select("#input_threshold1").node().value;
+      d3.select("#input_threshold2").node().value=1.5
+      threshold2l_2 = +d3.select("#input_threshold2").node().value;
+      d3.select("#input_threshold3").node().value=0.5
+      threshold2l_3 = +d3.select("#input_threshold3").node().value;
+    }
+
+    function resetInput() {
+      //default weights and threshold
+          d3.select("#input_weight1").node().value=1
+          w2l_1 = +d3.select("#input_weight1").node().value;
+          d3.select("#input_weight2").node().value=1
+          w2l_2 = +d3.select("#input_weight2").node().value;
+          d3.select("#input_weight3").node().value=1
+          w2l_3 = +d3.select("#input_weight3").node().value;
+          d3.select("#input_weight4").node().value=1
+          w2l_4 = +d3.select("#input_weight4").node().value;
+          d3.select("#input_weight5").node().value=""
+          w2l_5 = +d3.select("#input_weight5").node().value;
+          d3.select("#input_weight6").node().value=""
+          w2l_6 = +d3.select("#input_weight6").node().value;
+          d3.select("#input_weight7").node().value=""
+          w2l_7 = +d3.select("#input_weight7").node().value;
+
+          d3.select("#input_threshold_final").node().value=""
+          threshold2l_final = +d3.select("#input_threshold_final").node().value;
+          d3.select("#input_threshold1").node().value=""
+          threshold2l_1 = +d3.select("#input_threshold1").node().value;
+          d3.select("#input_threshold2").node().value=""
+          threshold2l_2 = +d3.select("#input_threshold2").node().value;
+          d3.select("#input_threshold3").node().value=""
+          threshold2l_3 = +d3.select("#input_threshold3").node().value;
+    }
+
+    //validata input variables - empty or 0 values are not valid
+    function validateInput() {
+        console.log("inside validateInput")
+        
+        if (w2l_1== "" | w2l_2== "" | w2l_3== "" | w2l_4== "" | w2l_5== "" | w2l_6== "" | w2l_7== "" |  threshold2l_final == "" |  threshold2l_1 == "" |  threshold2l_2 == "" |  threshold2l_3 == ""| w2l_1== 0 | w2l_2== 0 | w2l_3== 0 | w2l_4== 0 | w2l_5== 0 | w2l_6== 0 | w2l_7== 0 |  threshold2l_final == 0 |  threshold2l_1 == 0 |  threshold2l_2 == 0 |  threshold2l_3 == 0) {
+          console.log("validation failed: ");
+            d3.select("#result_label").node().value="Input validation error: "
+            d3.select("#result_msg").node().value="please provide weights & threshold"; //$errormsg: Perceptron doesn't like 0s or empty input
+            return false;
+        } else {
+          d3.select("#result_label").node().value="";
+          d3.select("#result_msg").node().value="";
+          return true;
+        }
+
+    };
+
+    //reset values - used on change of truth modes
+    function reset2l() {
+      console.log("inside reset, state2l_original: ", state2l_original);
+      if (state2l_original==-1) {
+        data=[];
+        draw(data);
+        notate(data);
+      }
+
+      if (selected_row_idx == null) {
+        if (selected_truth_mode=="XOR") {
+          truthTuple=truth_XOR[0] 
+        } else {console.log ("Error selecting truth mode")};
+
+        //very important step - initialize data for Perceptron to compute
+        truthTuple_array= d3.values(truthTuple);
+        data_truthPair=truthTuple_array.slice(0,2);
+        var arr = [];
+        for (var i = 0; i < 2; i++) {
+          arr.push(data_truthPair);
+        }
+        data2l_truthPair=[].concat.apply([], arr);
+        //console.log("dataTP: ", data2l_truthPair)
+
+        truth_output=truthTuple_array.slice(2,3);
+        console.log("truthTuple_array: ", data2l_truthPair)
+        state2l_original=0;
+      } else {
+        rememberSelectedRow()
+      }
+
+      //reset message label
+      d3.select("#result_label").node().value="";
+      d3.select("#result_msg").node().value="";
+
+    };
+    
+/**************************************** end part 2. PROCESS INPUT ***************************************************/
+
+/**************************************** COMPUTE functions ***************************************************/
+        
+    function compute2lUnit(data) {
+  
+        //validate input before computing
+        if (validateInput()) {
+          //step 0. draw original input
+          draw2l(data);
+          notate2l(data); 
+          state2l_original=1; 
+          
+          //next step 1. compute weighted sum
+          setTimeout(function() { compute2lWeightedSum(data);}, 2000); 
+        } 
+
+    };
+
+    function compute2lWeightedSum(data) {
+        
+        //step 1. compute weighted sums
+        data[0]=data[0] * w2l_1;
+        data[1]=data[1] * w2l_2 + data[2] * w2l_3;
+        data[2]=data[1]; //duplicate for D3 purposes
+        data[3]=data[3] * w2l_4;
+
+        draw2l(data);
+        notate2l(data);
+        
+        state2l_original=2;
+
+        //next step 2. compute hidden layer 
+        //compute against hidden thresholds
+        var me_step1, me_step2, me_step3, me_step4
+        if (data[0] > threshold2l_1) {
+            me_step1 = 1
+        } else {
+            me_step1 = 0
+        };
+        if (data[1] > threshold2l_2) {
+            me_step2 = 1
+            me_step3 = 1
+        } else {
+            me_step2 = 0
+            me_step3 = 0
+        };
+        if (data[3] > threshold2l_3) {
+            me_step4 = 1
+        } else {
+            me_step4 = 0
+        };
+
+        data[0]=me_step1;
+        data[1]=me_step2;
+        data[2]=me_step3;//duplicate
+        data[3]=me_step4;
+        //not drawing
+        
+        //next step 3. compute master weighted sum
+        setTimeout(function() {compute2lMasterWeightedSum(data);}, 2000);
+
+    };
+
+    function compute2lMasterWeightedSum(data) {
+        
+        var me_master_weighted_sum;
+        me_master_weighted_sum=data[0] * w2l_5 + data[1] * w2l_6 + data[3] * w2l_7 //omitted [2] bcs it's duplicate for D3 purposes
+        //step step 3. compute master weighted sum
+        data[0]=me_master_weighted_sum
+        data[1]=me_master_weighted_sum
+        data[2]=me_master_weighted_sum
+        data[3]=me_master_weighted_sum
+        // drawing
+        draw2l(data);
+        notate2l(data);
+        
+        state2l_original=3;
+        //next step 4. compute perceptron
+        setTimeout(function() {compute2lPerceptron(data);}, 2000);
+
+    }
+
+    function compute2lPerceptron(data) {
+        //console.log("inside computePerceptron: ", data, threshold);
+        
+        //step 4. compute perceptron
+        var me_step_master
+        if (data[0] > threshold2l_final) { //omitted data[2] because it's duplicate for D3 purposes
+            me_step_master = 1
+        } else {
+            me_step_master = 0
+        };
+
+        data[0]=me_step_master;
+        data[1]=me_step_master;
+        data[2]=me_step_master;
+        data[3]=me_step_master;
+
+        draw2l(data);
+        notate2l(data);
+        state2l_original=-1;
+        //done!
+        
+        //compare results
+        if (me_step_master==truth_output) {
+          d3.select("#result_label").node().value="Success: "
+          d3.select("#result_msg").node().value="Perceptron matched Truth table";
+        } else {
+          d3.select("#result_label").node().value="Error: "
+          d3.select("#result_msg").node().value="Perceptron didn't match Truth table";
+        }
+        
+        rememberSelectedRow(); //$ac revisit
+    };
+
+    //if user doesn't click on truth rows to change selection input, use previous input
+    function rememberSelectedRow(){
+      
+      data_truthPair=d3.values(truthTuple)
+      data_truthPair=data_truthPair.slice(0,0+2);
+
+      //very important step - initialize data for Perceptron to compute
+        //truthTuple_array= d3.values(truthTuple);
+        //data_truthPair=truthTuple_array.slice(0,2);
+        var arr = [];
+        for (var i = 0; i < 2; i++) {
+          arr.push(data_truthPair);
+        }
+        data2l_truthPair=[].concat.apply([], arr);
+    }
+
+
+/**************************************** end COMPUTE functions ***************************************************/
+
+/**************************************** UPDATE functions ***************************************************/
+
+    var circle2l_dynamic_setup = function(circle) {
+      //console.log("circle dynamic setup: ", circle, typeof(circle));
+      circle.attr('r', function(d, i) {if (state2l_original==0 |  state2l_original==3) {return radius_sm}  else if (state2l_original==1){return radius_med} else if (state2l_original==2){return radius_lg}})
+      .attr('cx', function(d, i) {if (state2l_original==0 ) {if (i==0 | i==2) {return 150} else if (i==1 | i==3) {return 250}} else if (state2l_original==1 ){if (i==0 ) {return 100} else if (i==1 | i==2) {return 200} else if (i==3) {return 300}} else if ( state2l_original==2 | state2l_original==3){return 200}})
+      .attr('cy', function(d, i) {if (state2l_original==0 ) {return 50}  else if (state2l_original==1){return 200} else if (state2l_original==2) {return 450} else if (state2l_original==3){return 650}})
+      .attr("fill", function(d) {if (state2l_original==0 | state2l_original==3 ) {if (d==0){return "blue"} else if (d==1) {return "red"}} else if (state2l_original==1 | state2l_original==2) {return "orange"}})
+      .style("stroke", "none")
+      .style("fill-opacity", function(d, i) {if (state2l_original==0 | state2l_original==3) {return .2}  else {return .4}})
+        
+    }        
+
+    var label2l_dynamic_setup = function(text) {
+    //text.text(function(d) {return d;})
+    text.attr( "opacity", 0 ).transition().duration(1000).attr( "opacity", 1 ).text(function(d) {return d;})
+        .attr('dx', function(d, i) {if (state2l_original==0 ) {if (i==0 | i==2) {return 150} else if (i==1 | i==3) {return 250}} else if (state2l_original==1 ){if (i==0 ) {return 100} else if (i==1 | i==2) {return 200} else if (i==3) {return 300}} else if ( state2l_original==2 | state2l_original==3){return 200}})
+        .attr('dy', function(d, i) {if (state2l_original==0 ) {return 50}  else if (state2l_original==1){return 200} else if (state2l_original==2) {return 450} else if (state2l_original==3){return 650}})
+        
+    }
+
+    // Update draw/label function
+    var draw2l = function(data) {
+      //console.log("inside draw: ")
+      // Bind self.settings.data
+      circles2l = circles2l_dynamic.selectAll('circle').data(data)
+      // Enter new elements
+      circles2l.enter().append('circle').call(circle2l_dynamic_setup)
+      // Exit elements that may have left
+      circles2l.exit().remove()
+ 
+      if (state2l_original != -1) { 
+        // Transition all circles to new settings
+      circles2l.transition().duration(1000).call(circle2l_dynamic_setup); //$acchange
+      }
+        
+    }
+
+    //notate dynamic - wrapped in a function
+    var notate2l = function(data) {
+      //console.log("inside notate: " + data)
+      // Bind self.settings.data
+      labels2l = labels2l_dynamic.selectAll('text').data(data).call(label2l_dynamic_setup)
+
+      // Enter new elements
+      labels2l.enter().append('text').call(label2l_dynamic_setup)
+
+      // Exit elements that may have left
+      labels2l.exit().remove()
+
+      //$note Transition all circles to new dself.settings.data - works for many cases, not for mine here
+      //src http://stackoverflow.com/questions/26264169/d3-js-text-enter-within-svg-transition-opacity-0-to-1-wont-end-at-1
+      //labels.transition().duration(1000).call(label2l_dynamic_setup)
+    }
+    
+/****************************************  end UPDATE functions ***************************************************/
+
+/**************************************** INIT functions ***************************************************/
+
+    var circle2l_static_setup = function(circle) {
+      //console.log("inside circle setup: ", circle);
+      circle.attr('r', function(d, i) {if (i==0 | i==1 | i==6) {return radius_sm} else if (i==5) {return radius_lg} else {return radius_med}})
+        .attr('cx', function(d, i) {if (i==0  ) {return 150} else if (i==1 ) {return 250} else if (i==2 ) {return 100} else if (i==4 ) {return 300} else {return 200}})
+        .attr('cy', function(d, i) {if (i==0 | i==1 ) {return 50} else if (i==2 | i==3 | i==4) {return 200} else if (i==5) {return 450} else if (i==6) {return 650}})
+        .attr("fill", "white")
+        .style("stroke", "grey")
+        //.style("fill-opacity", function(d, i) {if (i<4) {return .4} else {return 0}})
+        .attr("stroke-width", 2)
+        .style("stroke-dasharray", function(d, i) {if (i==2 | i==3 | i==4 | i==5) {return ("8, 4")} }) //("4, 4"))
+
+    };
+//$ac var data2l_orig= { x1_init: -1, x2_init: -1, w_sum1_hid: -1, w_sum2_hid: -1, w_sum3_hid: -1, w_sum_master: -1, y_out: -1};
+    
+    var circle2l_dynamic_init = function(circle) {
+      //console.log("inside circle setup: ", circle);
+      circle.attr('r', function(d, i) {return radius_sm})
+        .attr('cx', function(d, i) {if (i==0 | i==2) {return 150} else if (i==1 | i==3) {return 250}})
+        .attr('cy', 50) //$acwas function(d, i) {if (i==0 | i==1 ) {return 100} else if (i==2) {return 300} else if (i==3) {return 500}}
+        .attr("fill", "white")
+        .style("stroke", "none")
+
+    };
+
+    var label2l_static_setup = function(text) {
+    text.text(function(d) { if (d!=-1){return d}; })
+        .attr('dx', function(d, i) {if (i==0 | i==1) {return i*100 + 100 -10} else if (i==2) {return 125-10} else if (i==3) {return 175-10} else if (i==4) {return 225-10} else if ( i==5) {return 275-10} else if (i==6) {return 100 - 20} else if (i==7 ) {return 200 - 20} else if (i==8) {return 300 - 20} else if ( i==9) {return 130}  else if ( i==10) {return 200-10} else if ( i==11) {return 250} else if ( i==12) {return 200 -25} else if ( i==13) {return 150} else {return 355}})
+        .attr('dy', function(d, i) {if (i==0 | i==1 |i==14) {return 100 - 40} else if (i==2 | i==3 | i==4 | i==5 | i==15) {return 150} else if (i==6 | i==7 | i==8 | i==16) {return 200 + 10} else if (i==9 | i==10 | i==11 | i==19) {return 300 + 50} else if (i==12 |i==20) {return 450+10} else if (i==13) {return 650} else if (i==17) {return 300-10} else if (i==18) {return 300+10} else if (i==21) {return 570-10} else if (i==22) {return 570+10} else if (i==23) {return 650}})
+        .attr('class', function(d, i) { if (i==12) {return 'graph-text-oversized'} else if (i==6 | i==7 | i==8) {return 'graph-text-mediumsized'} else {return 'graph-text'}})
+        
+    };
+
+    var text2l_init = ["x1","x2", "w1", "w2", "w3", "w4", "Σ","Σ","Σ", "w5", "w6", "w7", "Σ", "y", "inputs", "weights: 1st round", "weighted sums", "step functions:", "Σ > thresholds 1,2,3 ", "weights: 2nd round", "master weighted sum", "master step function:","Σ > threshold final", "output"]; 
+
+
+    var label2l_dynamic_init = function(text) {
+    //text.text(function(d) { return none; }) //$was if (d!=-1){return d};
+        text.attr('dx', function(d, i) {if (i==0 | i==2) {return 150} else if (i==1 | i==3) {return 250}})
+        .attr('dy', '50')
+        
+    };
+
+
+    //draw initial graph encapsulated; not to be reused
+     var init = function() {
+      //console.log("inside init");
+        //reset all values
+        state2l_original=0;
+              
+        //1. initialize circles
+        //    separate 2 types of circles: a)static and b)dynamic
+        //1a. template with static circles
+        circles2l_static = svg.append("g")
+          .attr("class", "circle_static");
+
+        circles2l_static.selectAll("circle")
+            .data(data2l_init)
+            .enter()
+            .append("circle").call(circle2l_static_setup);
+
+        //1b. dynamic circles to work with data
+        circles2l_dynamic = svg.append("g")
+          .attr("class", "circle_dynamic");
+
+        circles2l_dynamic.selectAll("circle")
+            .data(data2l_truthPair)
+            .enter()
+            .append("circle").call(circle2l_dynamic_init);
+
+        //2. notate static template
+        //separate 2 types of labels: a)static and b)dynamic
+
+        //2a. template with static circles
+        //Bind self.settings.data
+        labels2l_static = svg.append("g")
+          .attr("class", "circle_static");
+
+        labels2l_static.selectAll("text")
+        // Bind self.settings.data
+            .data(text2l_init)
+            .enter()
+            .append("text").call(label2l_static_setup);
+
+        //2b. dynamic labels to work with data
+        labels2l_dynamic = svg.append("g")
+        .attr("class", "circle_dynamic");
+
+        labels2l_dynamic.selectAll("text")
+            .data(data2l_truthPair)
+            .enter()
+            .append("text").call(label2l_dynamic_init);
+
+      
+        //3. draw 3 static lines to connect the dots in the template
+        var line1 = svg.append("line")
+        .attr("class", "connecting_line")
+        .attr("x1", 150)
+        .attr("y1", 50+40)
+        .attr("x2", 100)
+        .attr("y2", 200-50)
+        .style("stroke-dasharray",("8, 4"));
+        var line2= svg.append("line")
+        .attr("class", "connecting_line")
+        .attr("x1", 150)
+        .attr("y1", 50+40)
+        .attr("x2", 200)
+        .attr("y2", 200-50)
+        .style("stroke-dasharray",("8, 4"));
+        var line3 = svg.append("line")
+        .attr("class", "connecting_line")
+        .attr("x1", 250)
+        .attr("y1", 50+40)
+        .attr("x2", 200)
+        .attr("y2", 200-50)
+        .style("stroke-dasharray",("8, 4"));
+        var line4 = svg.append("line")
+        .attr("class", "connecting_line")
+        .attr("x1", 250)
+        .attr("y1", 50+40)
+        .attr("x2", 300)
+        .attr("y2", 200-50)
+        .style("stroke-dasharray",("8, 4"));
+        var line5 = svg.append("line")
+        .attr("class", "connecting_line")
+        .attr("x1", 100)
+        .attr("y1", 200+50)
+        .attr("x2", 200)
+        .attr("y2", 400-10)
+        .style("stroke-dasharray",("8, 4"));
+        var line6 = svg.append("line")
+        .attr("class", "connecting_line")
+        .attr("x1", 200)
+        .attr("y1", 200+50)
+        .attr("x2", 200)
+        .attr("y2", 400-10)
+        .style("stroke-dasharray",("8, 4"));
+        var line7 = svg.append("line")
+        .attr("class", "connecting_line")
+        .attr("x1", 300)
+        .attr("y1", 200+50)
+        .attr("x2", 200)
+        .attr("y2", 400-10)
+        .style("stroke-dasharray",("8, 4"));
+        var line8 = svg.append("line")
+        .attr("class", "connecting_line")
+        .attr("x1", 200)
+        .attr("y1", 500+10)
+        .attr("x2", 200)
+        .attr("y2", 650-30)
+        .style("stroke-dasharray",("8, 4"));
+        
+    };
+/****************************************  end INIT functions ***************************************************/
+
+/**************************************** MAIN SVG functions ***************************************************/
+
+    svg = d3.select("#graph").append("svg")
+        .attr("width", "100%")
+        .attr("height", 1.2 * window.innerHeight)
+        //.append("g").attr("transform", "translate(15,35)");
+    
+    //draw initial graph - not to be reused
+    init();
+
+    //add images - step function icon
+    var img_data = ['img/step_function.png', 'img/step_function.png', 'img/step_function.png', 'img/step_function.png'];
+
+    //imageEnter.append('rect')
+    var rect = svg.selectAll("rect")
+      .data(img_data)
+      .enter().append("rect")
+      .attr('class', function(d, i) {if (i!=3) {return 'image-sm-border'} else {return 'image-border'}}) //'image-border')
+      .attr('x',function(d, i) {if (i==0 ) {return 100} else if(i==2) {return 250+10} else if(i==1) {return 200-20} else {return 200-30}})
+      .attr('y',function(d, i) {if (i!=3) {return 250+20} else  {return 550-10}})
+      .attr('stroke-dasharray', '8,4')
+      .attr('stroke-linecap', 'butt')
+      .attr('stroke-width', '2.6');
+
+    var imageEnter = svg.selectAll('image')
+      .data(img_data)
+      .enter().append('g')
+        //.attr('class', 'leaves');
+
+    imageEnter.append('image')
+      .attr('x',function(d, i) {if (i==0 ) {return 100} else if(i==2) {return 250+10} else if(i==1) {return 200-20} else {return 200-30}})
+      .attr('y',function(d, i) {if (i==0 | i==1 | i==2) {return 250+20} else  {return 550-10}})
+      .attr('class',function(d, i) {if (i!=3) {return 'image-sm'}})
+      .attr('xlink:href', function(d) {return d;})
+
+    
+/**************************************** end MAIN SVG functions ***************************************************/
+
+/**************************************** UTILITY functions - TABLE ***************************************************/
+
+function tabulate_and_rowIdx(data, columns) {
+
+var table = d3.select("#truth_table").append("table"),
+    thead = table.append("thead"),
+    tbody = table.append("tbody");
+
+// append the header row
+thead.append("tr")
+    .selectAll("th")
+    .data(columns)
+    .enter()
+    .append("th")
+        .text(function(column) { return column; });
+
+// create a row for each object in the data
+var rows = tbody.selectAll("tr")
+    .data(data)
+    .enter()
+    .append("tr")
+    .on("click", function(d,i,j) {
+      d3.selectAll("tr").classed("table_highlight", false);
+      d3.select(this).classed("table_highlight", true);
+
+    });
+
+// create a cell in each row for each column
+var cells = rows.selectAll("td")
+    .data(function(row) {
+        return columns.map(function(column) {
+            return {column: column, value: row[column]};
+        });
+    })
+    .enter()
+    .append("td")
+        .text(function(d) { return d.value; })
+        .on("click", function(d,i,j) { highlighted_row(j);});  //gives me the index of the clicked row!;
+
+return table;
+}
+
+var highlighted_row=function(i){
+  console.log("inside highlighted_row, state2l_original: ", state2l_original);
+      if (state2l_original==-1) {
+        data=[];
+        draw2l(data);
+        notate2l(data);
+      }
+
+  selected_row_idx = i;
+
+  if (selected_truth_mode=="AND") {
+          truthTuple=truth_AND[i] //was { x1: 1, x2: 1};
+        } else if (selected_truth_mode=="OR") {
+          truthTuple=truth_OR[i] 
+        } else if (selected_truth_mode=="XOR") {
+          truthTuple=truth_XOR[i] 
+        } else {console.log ("Error selecting truth mode")};
+
+        //very important step - initialize data for Perceptron to compute
+        truthTuple_array= d3.values(truthTuple);
+        data_truthPair=truthTuple_array.slice(0,2);
+        var arr = [];
+        for (var i = 0; i < 2; i++) {
+          arr.push(data_truthPair);
+        }
+        data2l_truthPair=[].concat.apply([], arr);
+        //console.log("dataTP: ", data2l_truthPair)
+
+        truth_output=truthTuple_array.slice(2,3);
+        console.log("truthTuple_array: ", data2l_truthPair)
+        state2l_original=0;
+
+  //reset message label
+  d3.select("#result_label").node().value="";
+  d3.select("#result_msg").node().value="";
+
+  console.log("picked row", data_truthPair); 
+}
+
+/**************************************** end UTILITY functions ***************************************************/
+
+</script>
+</body>
+</html>
+
+
