@@ -159,7 +159,9 @@ function update(source) {
       .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
   nodeUpdate.select("circle")
-      .attr("r", 4.5)
+      //.attr("r", 4.5)
+      .attr("r", function(d){ if(d.target<5) { return 3.5} else if(d.target<10) { return 4.5} 
+        else if(d.target>=5) { return 8} else {return 3} })
       //.style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
       .style("fill", function(d){ if(d.value==0) { return "green"} else if(d.value==1) { return "orange"} 
         else if(d.value==2) { return "red"} else {console.log("status: ", d.value);return "lightsteelblue"} });
