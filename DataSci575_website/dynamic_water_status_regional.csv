@@ -1,0 +1,203 @@
+source,target,value,source_name,target_name
+null,geo,-1,null,geo
+geo,Lake Nyasa,-1,geo,Lake Nyasa
+geo,Lake Victoria,-1,geo,Lake Victoria
+geo,Pangani,-1,geo,Pangani
+geo,Ruvuma / Southern Coast,-1,geo,Ruvuma / Southern Coast
+geo,Internal,-1,geo,Internal
+geo,Lake Tanganyika,-1,geo,Lake Tanganyika
+geo,Wami / Ruvu,-1,geo,Wami / Ruvu
+geo,Rufiji,-1,geo,Rufiji
+geo,Lake Rukwa,-1,geo,Lake Rukwa
+Lake Nyasa,Lake Nyasa_Iringa,-1,Lake Nyasa,Iringa
+Lake Nyasa,Lake Nyasa_Ruvuma,-1,Lake Nyasa,Ruvuma
+Lake Nyasa,Lake Nyasa_Mbeya,-1,Lake Nyasa,Mbeya
+Lake Victoria,Lake Victoria_Mara,-1,Lake Victoria,Mara
+Lake Victoria,Lake Victoria_Kagera,-1,Lake Victoria,Kagera
+Lake Victoria,Lake Victoria_Mwanza,-1,Lake Victoria,Mwanza
+Lake Victoria,Lake Victoria_Shinyanga,-1,Lake Victoria,Shinyanga
+Lake Victoria,Lake Victoria_Arusha,-1,Lake Victoria,Arusha
+Pangani,Pangani_Manyara,-1,Pangani,Manyara
+Pangani,Pangani_Tanga,-1,Pangani,Tanga
+Pangani,Pangani_Kilimanjaro,-1,Pangani,Kilimanjaro
+Pangani,Pangani_Arusha,-1,Pangani,Arusha
+Ruvuma / Southern Coast,Ruvuma / Southern Coast_Mtwara,-1,Ruvuma / Southern Coast,Mtwara
+Ruvuma / Southern Coast,Ruvuma / Southern Coast_Lindi,-1,Ruvuma / Southern Coast,Lindi
+Ruvuma / Southern Coast,Ruvuma / Southern Coast_Ruvuma,-1,Ruvuma / Southern Coast,Ruvuma
+Internal,Internal_Shinyanga,-1,Internal,Shinyanga
+Internal,Internal_Dodoma,-1,Internal,Dodoma
+Internal,Internal_Singida,-1,Internal,Singida
+Internal,Internal_Manyara,-1,Internal,Manyara
+Internal,Internal_Arusha,-1,Internal,Arusha
+Internal,Internal_Tabora,-1,Internal,Tabora
+Internal,Internal_Kilimanjaro,-1,Internal,Kilimanjaro
+Lake Tanganyika,Lake Tanganyika_Shinyanga,-1,Lake Tanganyika,Shinyanga
+Lake Tanganyika,Lake Tanganyika_Tabora,-1,Lake Tanganyika,Tabora
+Lake Tanganyika,Lake Tanganyika_Rukwa,-1,Lake Tanganyika,Rukwa
+Lake Tanganyika,Lake Tanganyika_Kigoma,-1,Lake Tanganyika,Kigoma
+Lake Tanganyika,Lake Tanganyika_Kagera,-1,Lake Tanganyika,Kagera
+Lake Tanganyika,Lake Tanganyika_Mwanza,-1,Lake Tanganyika,Mwanza
+Lake Tanganyika,Lake Tanganyika_Singida,-1,Lake Tanganyika,Singida
+Wami / Ruvu,Wami / Ruvu_Pwani,-1,Wami / Ruvu,Pwani
+Wami / Ruvu,Wami / Ruvu_Dodoma,-1,Wami / Ruvu,Dodoma
+Wami / Ruvu,Wami / Ruvu_Morogoro,-1,Wami / Ruvu,Morogoro
+Wami / Ruvu,Wami / Ruvu_Dar es Salaam,-1,Wami / Ruvu,Dar es Salaam
+Wami / Ruvu,Wami / Ruvu_Manyara,-1,Wami / Ruvu,Manyara
+Wami / Ruvu,Wami / Ruvu_Tanga,-1,Wami / Ruvu,Tanga
+Rufiji,Rufiji_Iringa,-1,Rufiji,Iringa
+Rufiji,Rufiji_Pwani,-1,Rufiji,Pwani
+Rufiji,Rufiji_Morogoro,-1,Rufiji,Morogoro
+Rufiji,Rufiji_Mbeya,-1,Rufiji,Mbeya
+Rufiji,Rufiji_Ruvuma,-1,Rufiji,Ruvuma
+Rufiji,Rufiji_Dodoma,-1,Rufiji,Dodoma
+Rufiji,Rufiji_Singida,-1,Rufiji,Singida
+Rufiji,Rufiji_Lindi,-1,Rufiji,Lindi
+Rufiji,Rufiji_Tabora,-1,Rufiji,Tabora
+Lake Rukwa,Lake Rukwa_Rukwa,-1,Lake Rukwa,Rukwa
+Lake Rukwa,Lake Rukwa_Mbeya,-1,Lake Rukwa,Mbeya
+Lake Rukwa,Lake Rukwa_Tabora,-1,Lake Rukwa,Tabora
+Lake Rukwa,Lake Rukwa_Singida,-1,Lake Rukwa,Singida
+Lake Nyasa_Iringa,1347,0,Iringa,1347
+Lake Nyasa_Iringa,18,1,Iringa,18
+Lake Nyasa_Iringa,217,2,Iringa,217
+Lake Nyasa_Ruvuma,640,0,Ruvuma,640
+Lake Nyasa_Ruvuma,43,1,Ruvuma,43
+Lake Nyasa_Ruvuma,390,2,Ruvuma,390
+Lake Nyasa_Mbeya,1337,0,Mbeya,1337
+Lake Nyasa_Mbeya,189,1,Mbeya,189
+Lake Nyasa_Mbeya,904,2,Mbeya,904
+Lake Victoria_Mara,886,0,Mara,886
+Lake Victoria_Mara,60,1,Mara,60
+Lake Victoria_Mara,1023,2,Mara,1023
+Lake Victoria_Kagera,1496,0,Kagera,1496
+Lake Victoria_Kagera,286,1,Kagera,286
+Lake Victoria_Kagera,1193,2,Kagera,1193
+Lake Victoria_Mwanza,1441,0,Mwanza,1441
+Lake Victoria_Mwanza,179,1,Mwanza,179
+Lake Victoria_Mwanza,1383,2,Mwanza,1383
+Lake Victoria_Shinyanga,1256,0,Shinyanga,1256
+Lake Victoria_Shinyanga,462,1,Shinyanga,462
+Lake Victoria_Shinyanga,551,2,Shinyanga,551
+Lake Victoria_Arusha,21,0,Arusha,21
+Lake Victoria_Arusha,2,1,Arusha,2
+Lake Victoria_Arusha,9,2,Arusha,9
+Pangani_Manyara,153,0,Manyara,153
+Pangani_Manyara,4,1,Manyara,4
+Pangani_Manyara,131,2,Manyara,131
+Pangani_Tanga,1379,0,Tanga,1379
+Pangani_Tanga,73,1,Tanga,73
+Pangani_Tanga,981,2,Tanga,981
+Pangani_Kilimanjaro,2532,0,Kilimanjaro,2532
+Pangani_Kilimanjaro,322,1,Kilimanjaro,322
+Pangani_Kilimanjaro,1356,2,Kilimanjaro,1356
+Pangani_Arusha,1308,0,Arusha,1308
+Pangani_Arusha,78,1,Arusha,78
+Pangani_Arusha,623,2,Arusha,623
+Ruvuma / Southern Coast_Mtwara,524,0,Mtwara,524
+Ruvuma / Southern Coast_Mtwara,126,1,Mtwara,126
+Ruvuma / Southern Coast_Mtwara,1080,2,Mtwara,1080
+Ruvuma / Southern Coast_Lindi,437,0,Lindi,437
+Ruvuma / Southern Coast_Lindi,88,1,Lindi,88
+Ruvuma / Southern Coast_Lindi,931,2,Lindi,931
+Ruvuma / Southern Coast_Ruvuma,709,0,Ruvuma,709
+Ruvuma / Southern Coast_Ruvuma,112,1,Ruvuma,112
+Ruvuma / Southern Coast_Ruvuma,486,2,Ruvuma,486
+Internal_Shinyanga,918,0,Shinyanga,918
+Internal_Shinyanga,118,1,Shinyanga,118
+Internal_Shinyanga,605,2,Shinyanga,605
+Internal_Dodoma,383,0,Dodoma,383
+Internal_Dodoma,117,1,Dodoma,117
+Internal_Dodoma,327,2,Dodoma,327
+Internal_Singida,991,0,Singida,991
+Internal_Singida,127,1,Singida,127
+Internal_Singida,874,2,Singida,874
+Internal_Manyara,821,0,Manyara,821
+Internal_Manyara,83,1,Manyara,83
+Internal_Manyara,302,2,Manyara,302
+Internal_Arusha,965,0,Arusha,965
+Internal_Arusha,95,1,Arusha,95
+Internal_Arusha,249,2,Arusha,249
+Internal_Tabora,296,0,Tabora,296
+Internal_Tabora,17,1,Tabora,17
+Internal_Tabora,328,2,Tabora,328
+Internal_Kilimanjaro,108,0,Kilimanjaro,108
+Internal_Kilimanjaro,0,1,Kilimanjaro,0
+Internal_Kilimanjaro,61,2,Kilimanjaro,61
+Lake Tanganyika_Shinyanga,615,0,Shinyanga,615
+Lake Tanganyika_Shinyanga,55,1,Shinyanga,55
+Lake Tanganyika_Shinyanga,402,2,Shinyanga,402
+Lake Tanganyika_Tabora,545,0,Tabora,545
+Lake Tanganyika_Tabora,28,1,Tabora,28
+Lake Tanganyika_Tabora,726,2,Tabora,726
+Lake Tanganyika_Rukwa,292,0,Rukwa,292
+Lake Tanganyika_Rukwa,34,1,Rukwa,34
+Lake Tanganyika_Rukwa,471,2,Rukwa,471
+Lake Tanganyika_Kigoma,1363,0,Kigoma,1363
+Lake Tanganyika_Kigoma,603,1,Kigoma,603
+Lake Tanganyika_Kigoma,850,2,Kigoma,850
+Lake Tanganyika_Kagera,231,0,Kagera,231
+Lake Tanganyika_Kagera,18,1,Kagera,18
+Lake Tanganyika_Kagera,92,2,Kagera,92
+Lake Tanganyika_Mwanza,61,0,Mwanza,61
+Lake Tanganyika_Mwanza,4,1,Mwanza,4
+Lake Tanganyika_Mwanza,34,2,Mwanza,34
+Lake Tanganyika_Singida,0,0,Singida,0
+Lake Tanganyika_Singida,0,1,Singida,0
+Lake Tanganyika_Singida,8,2,Singida,8
+Wami / Ruvu_Pwani,1182,0,Pwani,1182
+Wami / Ruvu_Pwani,9,1,Pwani,9
+Wami / Ruvu_Pwani,660,2,Pwani,660
+Wami / Ruvu_Dodoma,437,0,Dodoma,437
+Wami / Ruvu_Dodoma,66,1,Dodoma,66
+Wami / Ruvu_Dodoma,512,2,Dodoma,512
+Wami / Ruvu_Morogoro,986,0,Morogoro,986
+Wami / Ruvu_Morogoro,182,1,Morogoro,182
+Wami / Ruvu_Morogoro,945,2,Morogoro,945
+Wami / Ruvu_Dar es Salaam,461,0,Dar es Salaam,461
+Wami / Ruvu_Dar es Salaam,3,1,Dar es Salaam,3
+Wami / Ruvu_Dar es Salaam,341,2,Dar es Salaam,341
+Wami / Ruvu_Manyara,13,0,Manyara,13
+Wami / Ruvu_Manyara,9,1,Manyara,9
+Wami / Ruvu_Manyara,67,2,Manyara,67
+Wami / Ruvu_Tanga,57,0,Tanga,57
+Wami / Ruvu_Tanga,0,1,Tanga,0
+Wami / Ruvu_Tanga,57,2,Tanga,57
+Rufiji_Iringa,2794,0,Iringa,2794
+Rufiji_Iringa,105,1,Iringa,105
+Rufiji_Iringa,813,2,Iringa,813
+Rufiji_Pwani,374,0,Pwani,374
+Rufiji_Pwani,27,1,Pwani,27
+Rufiji_Pwani,383,2,Pwani,383
+Rufiji_Morogoro,1133,0,Morogoro,1133
+Rufiji_Morogoro,118,1,Morogoro,118
+Rufiji_Morogoro,642,2,Morogoro,642
+Rufiji_Mbeya,404,0,Mbeya,404
+Rufiji_Mbeya,146,1,Mbeya,146
+Rufiji_Mbeya,232,2,Mbeya,232
+Rufiji_Ruvuma,131,0,Ruvuma,131
+Rufiji_Ruvuma,9,1,Ruvuma,9
+Rufiji_Ruvuma,120,2,Ruvuma,120
+Rufiji_Dodoma,189,0,Dodoma,189
+Rufiji_Dodoma,26,1,Dodoma,26
+Rufiji_Dodoma,144,2,Dodoma,144
+Rufiji_Singida,19,0,Singida,19
+Rufiji_Singida,1,1,Singida,1
+Rufiji_Singida,72,2,Singida,72
+Rufiji_Lindi,23,0,Lindi,23
+Rufiji_Lindi,5,1,Lindi,5
+Rufiji_Lindi,62,2,Lindi,62
+Rufiji_Tabora,1,0,Tabora,1
+Rufiji_Tabora,0,1,Tabora,0
+Rufiji_Tabora,3,2,Tabora,3
+Lake Rukwa_Rukwa,415,0,Rukwa,415
+Lake Rukwa_Rukwa,101,1,Rukwa,101
+Lake Rukwa_Rukwa,495,2,Rukwa,495
+Lake Rukwa_Mbeya,578,0,Mbeya,578
+Lake Rukwa_Mbeya,169,1,Mbeya,169
+Lake Rukwa_Mbeya,680,2,Mbeya,680
+Lake Rukwa_Tabora,6,0,Tabora,6
+Lake Rukwa_Tabora,0,1,Tabora,0
+Lake Rukwa_Tabora,9,2,Tabora,9
+Lake Rukwa_Singida,1,0,Singida,1
+Lake Rukwa_Singida,0,1,Singida,0
+Lake Rukwa_Singida,0,2,Singida,0
