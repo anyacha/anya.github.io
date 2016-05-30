@@ -76,7 +76,7 @@ function drawVis(data) {
         svg.selectAll('circle')
         .filter(function (dOther) { return d.status_id == dOther.status_id })
         .style('opacity', 1.0)
-        .attr("r",function(dLast) { if(dLast.count>0 && dLast.count<=200) { return 6;} else if(dLast.count>200 && dLast.count<1350) {return dLast.count * .02;} else {return dLast.count * .011;}})
+        .attr("r",function(dLast) { if(dLast.count>0 && dLast.count<=200) { return 6;} else if(dLast.count>200 && dLast.count<1350) {return dLast.count * .018;} else {return dLast.count * .011;}})
     })
     .on("mouseout", function(d) {
         svg.selectAll('circle')
