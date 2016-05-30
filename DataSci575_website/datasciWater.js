@@ -65,7 +65,7 @@ function drawVis(data) {
    circles
     .attr("cx", function(d) { return x(d.year);  })
     .attr("cy", function(d) { return y(d.count);  })
-    .attr("r", function(d) { if(d.count>0 && d.count<=200) { return 3;} else if(d.count>200 && d.count<1300) {return d.count * .015;} else {return d.count * .012;}})
+    .attr("r", function(d) { if(d.count>0 && d.count<=200) { return 3;} else if(d.count>200 && d.count<1350) {return d.count * .015;} else {return d.count * .01;}})
     .style("stroke", "black")
     .style("stroke", "black")
      //.style("fill", function(d) { return colLightness(d.vol); })
@@ -76,13 +76,13 @@ function drawVis(data) {
         svg.selectAll('circle')
         .filter(function (dOther) { return d.status_id == dOther.status_id })
         .style('opacity', 1.0)
-        .attr("r",function(dLast) { if(dLast.count>0 && dLast.count<=200) { return 6;} else if(dLast.count>200 && dLast.count<1300) {return dLast.count * .030;} else {return dLast.count * .018;}})
+        .attr("r",function(dLast) { if(dLast.count>0 && dLast.count<=200) { return 6;} else if(dLast.count>200 && dLast.count<1350) {return dLast.count * .02;} else {return dLast.count * .011;}})
     })
     .on("mouseout", function(d) {
         svg.selectAll('circle')
         .filter(function (dOther) { return d.status_id == dOther.status_id })
         .style('opacity', 0.6)
-        .attr("r",function(dLast) { if(dLast.count>0 && dLast.count<=200) { return 3;} else if(dLast.count>200 && dLast.count<1300) {return dLast.count * .015;} else {return dLast.count * .012;}})
+        .attr("r",function(dLast) { if(dLast.count>0 && dLast.count<=200) { return 3;} else if(dLast.count>200 && dLast.count<1350) {return dLast.count * .015;} else {return dLast.count * .01;}})
     })   
 
 }
