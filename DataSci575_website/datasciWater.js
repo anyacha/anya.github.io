@@ -283,7 +283,7 @@ var update = function(value) {
           }
         }, 20);
         
-      });var data = truth_input
+      });
       break;
     case 4: 
       console.log ('inside case 4')
