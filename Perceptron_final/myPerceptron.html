@@ -1,6 +1,6 @@
 <!--project: my Perceptron - Anya Chaliotis -->
 <!--work for UW, iSchool, INFX598 Advanced Data Vis, taught by Jessica Hullman -->
-<!--inspired by INFX574 DataSciII, taught by Joshua Blumenstock -->
+<!--inspired by INFX574 DataSciII, taught by Prof. Joshua Blumenstock -->
 
 
 <!DOCTYPE html>
@@ -9,7 +9,10 @@
 <link rel="stylesheet" href="myPerceptron.css">
 <title>My Perceptron Visualized</title>
 <h1>Two Perceptrons is Better Than One</h1>
-<h2>INFX574: DataSci meets INFX598: DataVis</h2>
+<h2>DataSci meets DataVis</h2>
+<div class="text_credits">Author: Anya Chaliotis<br>March 2016<br>
+  This visualization is insprired by Prof. Joshua Blumenstock's
+   lecture on Neural Networks.</div>
 <h3>Perceptron: what is it?</h3>
 <a href="https://cs.stanford.edu/people/eroberts/courses/soco/projects/neural-networks/Neuron/index.html" class="text_credits">Site credits: https://cs.stanford.edu/people/eroberts/courses/soco/projects/neural-networks/Neuron/index.html</a>
 <p>The perceptron is a mathematical model of a biological neuron. While in actual neurons the dendrite receives electrical signals from the axons of other neurons, in the perceptron these electrical signals are represented as numerical values. At the synapses between the dendrite and axons, electrical signals are modulated in various amounts. This is also modeled in the perceptron by multiplying each input value by a value called the weight. An actual neuron fires an output signal only when the total strength of the input signals exceed a certain threshold. We model this phenomenon in a perceptron by calculating the weighted sum of the inputs to represent the total strength of the input signals, and applying a step function on the sum to determine its output. As in biological neural networks, this output is fed to other perceptrons.</p>
@@ -266,7 +269,7 @@ This result is useful because it turns out that some logic functions such as the
     </div>
 
     <!--7--><div>
-      <h3>Want to try on your own?</h3>
+      <h3 id="singlePerceptron">Want to try on your own?</h3>
       So far the magic of a perceptron "firing" was hidden from you.  If you'd like to see how it works for each pair, check out<br> 
       <a href="myPerceptron1Layer.html" class="text_highlight">Single Perceptron in Action</a> <br><br><br>
       Still working on XOR?  You can keep trying or take our word for it: it's impossible.  And here's why...
@@ -282,11 +285,11 @@ This result is useful because it turns out that some logic functions such as the
 <div id='container2'>
 XOR is not linearly separable, therefore it can't be solved by a single perceptron.<br>
 <img src="img/3Amigos.png" style="width:100%;" ></img><br><br>
-<span class="text_credits"> Image credits: University of Washington, INFX574 - Joshua Blumenstock - iSchool </span>
+<span class="text_credits"> Image credits: University of Washington, INFX574 - Prof. Joshua Blumenstock - iSchool </span>
 <h3>So Perceptron was abondoned...</h3>
 <p>Time went by.  Machines grew stronger.  Truth hasn't aged at all.  And XOR still needed to be solved...  The question remained: how?</p>
 <br>
-<h3>A genious idea!</h3>If a single perceptron can't resolve the XOR problem, what about two perceptrons?<br>Give it another try with<br>
+<h3 id="multiPerceptron">A genious idea!</h3>If a single perceptron can't resolve the XOR problem, what about two perceptrons?<br>Give it another try with<br>
 <a href="myPerceptron2Layers.html" class="text_highlight">More than One Perceptron</a> <br><br><br>
 And that's why we titled this exploration as 'Two Perceptrons is Better Than One'!
 
@@ -295,8 +298,9 @@ And the story hasn't ended here.  Layering perceptrons gave rise to neural netwo
 </div>
 <div>
   <h3>Citations</h3>
+  <p>Blumenstock, J. (2016, February 18). Neural Networks. INFX 574: Data Science II: Core Methods in Data Science. Lecture conducted from University of Washington, Information School, Seattle.
   <p>
-    <a href='https://cs.stanford.edu/people/eroberts/courses/soco/projects/neural-networks/index.html'>Neural Networks</a>
+    <a href='https://cs.stanford.edu/people/eroberts/courses/soco/projects/neural-networks/index.html'>Neural Networks</a> &nbsp; https://cs.stanford.edu/people/eroberts/courses/soco/projects/neural- networks/Neuron/index.html
   </p>
   <p><a href='https://github.com/1wheel/graph-scroll'>Simple scrolling events for d3 graphs</a></p>
 </div>
