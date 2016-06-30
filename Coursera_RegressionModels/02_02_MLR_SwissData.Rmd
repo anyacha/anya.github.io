@@ -1,0 +1,209 @@
+---
+title: "DataSci - Multivariable Regression"
+author: "Anya Chaliotis"
+date: "June 30, 2016"
+output: html_document
+---
+
+
+## Swiss Fertility and Socioeconomic Indicators Data
+This work is a replication of an examaple from a Coursera course offered by Johns Hopkins University, Data Science, Regression Models.  See citations section for source of code and learning concepts.
+
+"Switzerland, in 1888, was entering a period known as the demographic transition; i.e., its fertility was beginning to fall from the high level typical of underdeveloped countries.  Given the data, we are looking into what explains fertility in this province" (R Core Team, 2015).
+
+```{r echo=FALSE}
+### 0 setup
+library(datasets)
+data(swiss)
+require(stats); require(graphics)
+```
+
+### Dataset
+"Standardized fertility measure and socio-economic indicators for each of 47 French-speaking provinces of Switzerland at about 1888" (R Core Team, 2015).
+A data frame with 47 observations on 6 variables, each of which is in percent.  
+- Fertility Ig, ‘ common standardized fertility measure’  
+- Agriculture % of males involved in agriculture as occupation  
+- Examination % draftees receiving highest mark on army examination  
+- Education % education beyond primary school for draftees.  
+- Catholic % ‘catholic’ (as opposed to ‘protestant’).  
+- Infant.Mortality live births who live less than 1 year.  
+All variables but ‘Fertility’ give proportions of the population.  
+
+### EDA (Exploratory Data Analysis) 
+```{r echo=FALSE}
+summary(swiss)
+```
+#### Marginal plots 
+The marginal relationship of interest without considering the other variables.
+```{r}
+pairs(swiss, panel = panel.smooth, main = "Swiss data", col = 3 + (swiss$Catholic > 50))
+```
+#### Marginal plots with correlation 
+```{r}
+### better, more informative plot, with LM
+require(GGally); require(ggplot2)
+my_fn <- function(data, mapping, ...){
+p <- ggplot(data = data, mapping = mapping) + 
+    geom_point() + 
+    geom_smooth(method=lm, fill="blue", color="blue", ...)
+p
+}
+g <- ggpairs(swiss, lower=list(continuous=my_fn))
+g
+```
+
+### Regression Models
+#### Model #1 - fit all the variables
+Look at all the variables as the predictors
+```{r}
+### Calling lm()
+fit_all <- lm(Fertility ~ . , data = swiss)
+summary(fit_all)$coefficients
+```
+Interpreation example: Agriculture  
+- We estimate an expected 0.17 decrease in standardized fertility for every 1\% increase in percentage of males involved in agriculture in holding the remaining variables constant.  
+- Std. Error = 0.07, indicates how precise the variable is, or statistical variability of the coefficient  
+- t-statistic = -2.448, it's the estimate divided by the std error (-0.17 divided by 0.07). R conveniently gives it to us.  
+- P-value = 0.01873, it's the probability of getting a t-statistic as extreme as that. As small as negative 2.448 or smaller, and we double that p-value because of a two-sided test.  
+- The t-test for $H_0: \beta_{Agri} = 0$ versus $H_a: \beta_{Agri} \neq 0$ is  significant.
+
+Now, we go through other models and look at how the process of model selection changes our estimates. 
+
+#### Model #2 - only Agriculture as a predictor
+Look at the association between fertility and agriculture.
+```{r}
+summary(lm(Fertility ~ Agriculture, data = swiss))$coefficients
+```
+Interestingly, the agriculture coefficient changed signs. Instead of agriculture having a negative effect on fertility, it has a positive effect on fertility. So, adjusting for the other variables changes the actual direction of the effect of agriculture on fertility.
+
+So, Regression is a dynamic process, where you're going to have to think about what variables to include.  If there hasn't been randomization to protect you from confounding, you're gonna have to go through a scientific dynamic process of putting confounders in and out and thinking about what they're doing to your effective interest in order to evaluate it.
+
+#### Model #3 - Agriculture, Education and Examination as predictors
+Look at the association between fertility and 3 variables.
+```{r}
+summary(lm(Fertility ~ Agriculture + Education + Examination, data = swiss))$coefficients
+```
+- The Agriculture sign reverses itself with the inclusion of Examination and Education, both of which are negatively correlated with Agriculture.  
+- So educational attainment is negatively correlated with the percent working in agriculture, a correlation of -0.64.  
+- Education and Examination are measuring similar things. Their correlation = 0.6984.
+
+The question arises, is this a positive association between agriculture and fertility by itself when done via ordinary linear regression?  Claiming a positive causal relationship between agriculture and fertility would definitely be suspect, because of observational data (as opposed to experimental design).  But even to claim an association between agriculture and fertility, that also would be suspect, because you can so easily break that association and reverse it by the inclusion of other, very reasonable variables.  Not having accounted for these other variables produces an erroneous model. Education, by the way, has a stronger effect on fertility than agriculture.  At the minimum, anyone claiming that provinces that are more agricultural have higher fertility rates would immediately be open to criticism. 
+
+### Regression Models with Factor variables
+Linear regression models are very flexible. For example, you can fit factor variables as regressors and come up with things like analysis of variance (ANOVA), as a special case of linear models. Let's go through an example where we have one covariant, X equal to zero or one, and let's see what happens when we put that into a linear regression model.
+
+Consider the linear model
+$$
+Y_i = \beta_0 + \beta_1 X_{i1}  + \epsilon_{i}
+$$
+where each $X_{i1}$ is binary so that it is a 1 if measurement $i$ is in a group and 0 otherwise. (Treated=1 versus Control=0 in a clinical trial)  
+- Then for people who received treatment $E[Y_i] = \beta_0 + \beta_1$  
+- And for people in the control group $E[Y_i] = \beta_0$  
+- The LS (least squares) fits work out to be $\hat \beta_0 + \hat \beta_1$ is the mean for those who received treatment and $\hat \beta_0$ is the mean for those not in the control group.  
+- $\beta_1$ is interpretted as the increase or decrease in the mean comparing those in the treatment group to those not.
+
+So that's just a nice way to be able to fit a two-level factor variable as a linear regression variable. Not only the fitted values tell you about the means for both of the groups, but it gives you an inference for comparing the two groups automatically. (Refer to t-test from statistical inference - the t-test for $\beta_1$ is exactly identical to a two-group T test where you assume a common variance)
+
+We can extend this to more than two levels.  Whenever you're dealing with factor variables in linear models, what you set at your reference level has a big effect. Choice of reference category changes the interpretation of the coefficients.  To conclude, dummy variables are smart!
+
+### More advanced fits - Interaction term
+Fitting multiple lines with different intercepts and different slopes.
+
+Let's take the Catholic variable.
+```{r}
+hist(swiss$Catholic)
+```
+
+Notice that it's very bimodal. That's because most provinces are either majority Catholic or majority Protestant, from this time period.
+```{r}
+#create binary catholic variable
+library(dplyr)
+swiss2 = mutate(swiss, CatholicBin = 1 * (Catholic>50))
+swiss2$CatholicBin <- as.factor(swiss2$CatholicBin)
+#plot
+g<-ggplot(swiss2, aes(x=Agriculture, y=Fertility, color=CatholicBin))
+g<-g+geom_point(size=4)
+g<-g+xlab("% in Agriculture") + ylab("Fertility")
+g
+
+```
+
+Now, trying different models.
+First, create a model that doesn't have religion at all - just Fertility and Agriculture. Ignores the color of the dots.
+```{r}
+fit1 <- lm(Fertility ~ Agriculture, swiss2)
+g1 <-g
+g1 <-g1 + geom_abline(intercept = coef(fit1)[1], slope=coef(fit1)[2], size=2)
+g1
+
+summary(fit1)$coef
+```
+
+Next, fit parallel models. 
+```{r}
+fit2 <- lm(Fertility ~ Agriculture + CatholicBin, swiss2)
+summary(fit2)$coef
+#note: if no factor fit2 <- lm(Fertility ~ Agriculture + factor(CatholicBin), swiss2)
+g1 <-g
+g1 <-g1 + geom_abline(intercept = coef(fit2)[1], slope=coef(fit2)[2], size=2, color="red")
+g1 <-g1 + geom_abline(intercept = coef(fit2)[1] + coef(fit2)[3], slope=coef(fit2)[2], size=2, color="blue")
+g1
+```
+Two fitted lines: different intercepts and the same slope
+
+Now, different slopes depending on the percent of the province that is Catholic.
+```{r}
+fit3 <- lm(Fertility ~ Agriculture * CatholicBin, swiss2)
+summary(fit3)$coef
+#note: if no factor fit2 <- lm(Fertility ~ Agriculture + factor(CatholicBin), swiss2)
+g1 <-g
+g1 <-g1 + geom_abline(intercept = coef(fit3)[1], slope=coef(fit3)[2], size=2, color="red")
+g1 <-g1 + geom_abline(intercept = coef(fit3)[1] + coef(fit3)[3], slope=coef(fit3)[2]+coef(fit3)[4] , size=2, color="blue")
+g1
+```
+Adding an interaction term changed slopes of Catholic vs Protestant lines.
+
+### Citations
+Caffo, B (2016). Coursera Course, "Regression Models", Johns Hopkins Universtiy.  Retrieved from https://github.com/bcaffo/courses/tree/master/07_RegressionModels.
+
+R Core Team (2015). R: A language and environment for statistical computing. R Foundation
+  for Statistical Computing, Vienna, Austria. URL http://www.R-project.org/.
+```{r}
+citation(package="datasets")
+```
+### Appendix A. Unnecessary variable
+Quickly what happens if you include a completely unnecessary variable in the model. By completely unnecessary, what if you include a variable that is simply a linear combination of the other variables that you've already included.
+```{r}
+z <- swiss$Agriculture + swiss$Education
+lm(Fertility ~ . + z, data = swiss)
+```
+z is nothing other than agriculture plus education, added together. It has no added value. We've already included education and we've already included agriculture in our joint model. z adds no new linear information, since it's a linear combination of variables already included. All the coefficients stayed the same.  R just drops terms that are linear combinations of other terms.  If you see an NA in r after you fit a linear model, then probably the most likely culprit is you've included a variable that is either numerically or exactly a linear combination of the other variables.
+
+
+
+
+```{r eval=FALSE, echo=FALSE}
+### xtra - original code from video errored out
+#g <- ggpairs(swiss, lower=list(continuous="smooth"), params=(method="lowess"))
+
+#fix: src https://cran.r-project.org/web/packages/GGally/vignettes/ggpairs.html
+require(GGally); require(ggplot2)
+data(swiss, package="GGally")
+g <- ggpairs(swiss)
+g
+```
+
+```{r eval=FALSE, echo=FALSE}
+#fix#2: src http://www.r-bloggers.com/multiple-regression-lines-in-ggpairs/
+my_fn <- function(data, mapping, ...){
+p <- ggplot(data = data, mapping = mapping) + 
+    geom_point() + 
+    geom_smooth(method=loess, fill="red", color="red", ...) +
+    geom_smooth(method=lm, fill="blue", color="blue", ...)
+p
+}
+g = ggpairs(swiss,columns = 1:4, lower = list(continuous = my_fn))
+g
+```
+
+
