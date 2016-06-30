@@ -11,11 +11,13 @@ This work is a replication of an examaple from a Coursera course offered by John
 
 "Switzerland, in 1888, was entering a period known as the demographic transition; i.e., its fertility was beginning to fall from the high level typical of underdeveloped countries.  Given the data, we are looking into what explains fertility in this province" (R Core Team, 2015).
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE}
 ### 0 setup
 library(datasets)
 data(swiss)
 require(stats); require(graphics)
+library(dplyr)
+require(GGally); require(ggplot2)
 ```
 
 ### Dataset
@@ -38,10 +40,11 @@ The marginal relationship of interest without considering the other variables.
 ```{r}
 pairs(swiss, panel = panel.smooth, main = "Swiss data", col = 3 + (swiss$Catholic > 50))
 ```
+
 #### Marginal plots with correlation 
 ```{r}
-### better, more informative plot, with LM
-require(GGally); require(ggplot2)
+### more informative plot, with LM
+#require(GGally); require(ggplot2)
 my_fn <- function(data, mapping, ...){
 p <- ggplot(data = data, mapping = mapping) + 
     geom_point() + 
@@ -89,7 +92,7 @@ summary(lm(Fertility ~ Agriculture + Education + Examination, data = swiss))$coe
 
 The question arises, is this a positive association between agriculture and fertility by itself when done via ordinary linear regression?  Claiming a positive causal relationship between agriculture and fertility would definitely be suspect, because of observational data (as opposed to experimental design).  But even to claim an association between agriculture and fertility, that also would be suspect, because you can so easily break that association and reverse it by the inclusion of other, very reasonable variables.  Not having accounted for these other variables produces an erroneous model. Education, by the way, has a stronger effect on fertility than agriculture.  At the minimum, anyone claiming that provinces that are more agricultural have higher fertility rates would immediately be open to criticism. 
 
-### Regression Models with Factor variables
+### Regression Models with Factor Variables
 Linear regression models are very flexible. For example, you can fit factor variables as regressors and come up with things like analysis of variance (ANOVA), as a special case of linear models. Let's go through an example where we have one covariant, X equal to zero or one, and let's see what happens when we put that into a linear regression model.
 
 Consider the linear model
@@ -106,18 +109,18 @@ So that's just a nice way to be able to fit a two-level factor variable as a lin
 
 We can extend this to more than two levels.  Whenever you're dealing with factor variables in linear models, what you set at your reference level has a big effect. Choice of reference category changes the interpretation of the coefficients.  To conclude, dummy variables are smart!
 
-### More advanced fits - Interaction term
-Fitting multiple lines with different intercepts and different slopes.
+### More Advanced Fit - Interaction Term
+Fitting multiple lines with different intercepts and different slopes.  Basis of ANCOVA.
 
 Let's take the Catholic variable.
 ```{r}
 hist(swiss$Catholic)
 ```
 
-Notice that it's very bimodal. That's because most provinces are either majority Catholic or majority Protestant, from this time period.
-```{r}
+Notice that it's very bimodal. That's because most provinces are either majority Catholic or majority Protestant.
+```{r warning=FALSE}
 #create binary catholic variable
-library(dplyr)
+#library(dplyr)
 swiss2 = mutate(swiss, CatholicBin = 1 * (Catholic>50))
 swiss2$CatholicBin <- as.factor(swiss2$CatholicBin)
 #plot
@@ -149,6 +152,7 @@ g1 <-g1 + geom_abline(intercept = coef(fit2)[1], slope=coef(fit2)[2], size=2, co
 g1 <-g1 + geom_abline(intercept = coef(fit2)[1] + coef(fit2)[3], slope=coef(fit2)[2], size=2, color="blue")
 g1
 ```
+
 Two fitted lines: different intercepts and the same slope
 
 Now, different slopes depending on the percent of the province that is Catholic.
@@ -161,6 +165,7 @@ g1 <-g1 + geom_abline(intercept = coef(fit3)[1], slope=coef(fit3)[2], size=2, co
 g1 <-g1 + geom_abline(intercept = coef(fit3)[1] + coef(fit3)[3], slope=coef(fit3)[2]+coef(fit3)[4] , size=2, color="blue")
 g1
 ```
+
 Adding an interaction term changed slopes of Catholic vs Protestant lines.
 
 ### Citations
