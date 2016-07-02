@@ -1,0 +1,43 @@
+---
+title: "DataSci - Regression Models"
+subtitle: "Residuals for Diagnostics"
+author: "Anya Chaliotis"
+date: "July 1, 2016"
+output: html_document
+---
+
+## Stefanski O RLY Owl
+This work is a replication of an examaple from a Coursera course offered by Johns Hopkins University, Data Science, Regression Models.  See citations section for source of code and learning concepts.
+
+"O RLY? is an Internet phenomenon, typically presented as an image macro featuring a snowy owl. The phrase "O RLY?", an abbreviated form of "Oh, really?", is popularly used in Internet forums in a sarcastic manner, often in response to an obvious, predictable, or blatantly false statement" (O RLY?, Wikipedia 2015).
+
+### An example by Stefanski that shows why we do residual plots.
+
+First we load data and explore it with the pairs plot.
+```{r}
+dat <- read.table('http://www4.stat.ncsu.edu/~stefanski/NSF_Supported/Hidden_Images/orly_owl_files/orly_owl_Lin_4p_5_flat.txt', header = FALSE)
+pairs(dat)
+```
+
+Then we fit a multivariate regression model to examine which predictors should be used to explain the response variable.
+```{r}
+summary(lm(V1 ~ . -1, data = dat))$coef
+```
+
+All P-values are statistically significant.  Should we bother to do a residual plot?
+
+```{r, fig.height=4, fig.width=4, echo = TRUE}
+par(mfrow=c(1,1))
+fit <- lm(V1 ~ . - 1, data = dat); plot(predict(fit), resid(fit), pch = '.')
+```
+
+We look at residual plots is because they zoom on potential problems with our model.  O RLY owl is a very clear systematic pattern in our residuals that we would have missed just by evaluating lm() coefficients.  
+
+In Stefanski's (2007) famous paper "Residual (Sur)Realism", he writer presents an algorithm for generating multiple linear regression data having fixed residuals and predicted values. He then describes how this algorithm can be used to embed hidden images and messages in residual plots and added-variable plots. He suggests that the model can be used at undergraduate level to provide interesting and amusing datasets for simple model-building exercises and at graduate level to provide amusing examples and a means of generating curiosity in the method's workings.
+
+### Citations
+Caffo, B (2016). Coursera Course, "Regression Models", Johns Hopkins Universtiy.  Retrieved from https://github.com/bcaffo/courses/tree/master/07_RegressionModels.
+
+O RLY? (2015) Wikipedia. Retrieved from: https://en.wikipedia.org/wiki/O_RLY%3F
+
+Stefanski, L. A. (2007). Residual (Sur)Realism. American Statistician, 61(2), 163. doi:10.1198/000313007X190079
