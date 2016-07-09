@@ -1,0 +1,296 @@
+---
+title: "Hypothesizing about Vitamin C and ToothGrowth"
+author: "Anya Chaliotis"
+date: "Sep 21, 2015"
+output:
+  html_document: default
+  pdf_document:
+    fig_crop: no
+    fig_height: 3.5
+  word_document:
+    fig_height: 3.5
+---
+
+This report explores ToothGrowth data that tracked the effect of vitamin C on toogh growth in guinea pigs.  We compared tooth growth by supplement type and dose and posed a question: is the difference between the two delivery methods significant or due to a random chance?  We applied hypothesis testing  and confidence intervals to perform our analysis.
+```{r setup, include=FALSE, echo=FALSE}
+library(ggplot2)
+```
+## 1. Exploratory Analysis  
+R documentation provides the following description of the data:  
+The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of vit C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice OJ or ascorbic acid VC).   
+```{r echo=FALSE, fig.height=4}
+#1.  Load data and explore data
+data(ToothGrowth)
+```
+
+See Appendix A for a graphic that shows performance by supplement type at each dose.  By visually examinging the data, we detect an increase in tooth growth with a higher dose, both in orange juice (OJ) and ascorbic acid (VC) delivery methods.  
+
+ToothGrowth contains 60 observations of 3 variables: tooth length, supplement type (OJ and VC), and dose in miligrams.  We built a contingency table that summed up total length by supplement type and dose:
+```{r}
+#Table 1. Contingency table: sum of length by supplement type (OJ vs VC) and dose (0.5,1,2 mg)
+xtabs(len~supp+dose,data=ToothGrowth)
+```
+
+Let's say our hypothetical researchers saw this data as evidence that administering vit C by OJ produces healthier teeth in gunea pigs than by VC.  We will compare differences between performance by 2 delivery methods, OJ vs VC, per each dose and test for their significance.  (Disclaimer: there're multiple ways to compare this data; our choice corresponds to our hypothetical hypothesis.)
+
+## Approach and Assumptions
+Tooth growth dataset can be split into 30 observations of OJ and VC each.  We considered comparing these 2 subsets by supplement type.  We also noticed a plausable relationship between the dose and tooth length.  Therefore, we decided to compare the data by supplement type + dose, which means we have 6 relevant samples each of size 10.  We need to determine if difference in tooth growth is significant or due to chance. 
+
+-We will use t distribution because of small sample sizes (n=10).   
+-In each comparison, we will be comparing 2 independent samples.  Our samples are not paired.  
+-Visual examination (see Appendix A) suggests different variances, and given no other clues to think variances are equal, we chose unequal variances.  It's consistent with the rule: when unsure, assume unequal variances.  
+-Our researchers want to prove superiority of OJ and specifically asked for one-tailed tests.  We convinced them to use two-tailed tests, as a standard in the real world of research. To appease their concerns, we promised to provide them with a p-value, which would enable them to perform the hypothesis test at whatever level they chose.
+
+## Hypothesis Testing
+Step 1.  Propose a hypothesis  
+Ho There's no difference in tooth growth between VC and OJ (per each dose)  
+Ha There's a difference in tooth growth between VC and OJ (per each dose)  
+
+Step 2.  Choose signifince type and level  
+alpha=.05 (a benchmark rate in research field)  
+We agreed on two-tailed 95% confidence intervals (CI), which means using .975 quantile 
+
+Step 3.  Select the right test  
+Perfrom t tests which help to account for errors due to small datasets (see assumptions above)
+
+Dose 1 = 0.5 mg  
+Step 4.  Calculate 95% CIs using R t.test().  Compare to manual calculations (see  Appendix B).   
+```{r echo=FALSE, fig.width=9}
+##t test: compare 2 independent groups OJ vs VC, unequal variance, alpha .05, one-tailed, R and manual
+dose1 <- subset(ToothGrowth, dose==0.5)
+dose2 <- subset(ToothGrowth, dose==1)
+dose3 <- subset(ToothGrowth, dose==2)
+
+n<-10
+df<-n-1
+
+#1) manual calculations
+dose1.VC<-dose1[dose1$supp=="VC",]
+dose1.OJ<-dose1[dose1$supp=="OJ",]
+dose1.mu<-mean(dose1.VC$len)
+dose1.xbar<-mean(dose1.OJ$len)
+dose1.stderr<-((sd(dose1[dose1$supp=="OJ",]$len)^2)/n + 
+        (sd(dose1[dose1$supp=="VC",]$len)^2)/n)^(1/2)
+
+#calculate df, a complicated formula for t independent groups with unequal variances
+dose1.df.num<-((sd(dose1[dose1$supp=="OJ",]$len)^2)/n + 
+        (sd(dose1[dose1$supp=="VC",]$len)^2)/n)^2
+dose1.df.denom<-((sd(dose1[dose1$supp=="OJ",]$len)^2)/n)^2/(n-1) + 
+        ((sd(dose1[dose1$supp=="VC",]$len)^2)/n)^2/(n-1)
+dose1.df<-dose1.df.num/dose1.df.denom 
+
+#now with df, can calculate t value
+dose1.tvalue<-qt(.975,df = dose1.df)
+#now have everything to calculate 95% CI
+dose1.ci.manual<-dose1.xbar-dose1.mu+c(-1,1)*dose1.tvalue*dose1.stderr
+
+#2) run R test.t function
+dose1.ci.t.test<- t.test(len ~ supp, paired = FALSE, conf.level = .95, var.equal = FALSE, 
+        data = dose1)$conf
+dose1.pvalue<-t.test(len ~ supp, paired = FALSE, conf.level = .95, var.equal = FALSE, 
+        data = dose1)$p.value
+
+#3) compare results
+rbind(
+    dose1.ci.t.test,
+    dose1.ci.manual)    
+```
+
+Step 5.  Draw conclusions (including visually)  
+Based on the 95% CI, which doesn't contain 0, we reject Ho in favor of Ha.  
+Function t.test returns p-value: `r round(dose1.pvalue,4)`, which is smaller than alpha, and means that the difference in means is mostl likely not due to chance.  Our hypothetical researchers may be on to something!
+
+```{r echo=FALSE}
+##our sample - draws 2 density curves which overlap
+
+#dataframe
+len1 <- c(dose1.VC$len, dose1.OJ$len)
+supp1 <- as.factor(c(rep("VC", 10), rep("OJ", 10)))
+df1 <- data.frame(len=len1,  supp=supp1)
+critical1.t.upper<-round(dose1.mu + dose1.tvalue*dose1.stderr,2) 
+critical1.t.lower<-round(dose1.mu - dose1.tvalue*dose1.stderr,2)
+
+## draw  
+plot_dose1 <- ggplot(df1, aes(len, fill=supp)) + 
+    geom_density(alpha=.5) + 
+    stat_function(fun = dnorm, args = list(mean=dose1.mu, sd=dose1.stderr), color="blue", size=1) +
+    ggtitle("Fig 1. Dose 0.5 mg, VC vs. OJ  - reject Ho") +
+    scale_fill_manual(values = c("orange", "blue")) + 
+    guides(fill=guide_legend(title=NULL)) + 
+    geom_vline(xintercept=dose1.mu, colour="blue", size=1, linetype="dashed") +
+    geom_vline(xintercept=critical1.t.upper, colour="red", size=1, linetype="dashed") +
+    geom_vline(xintercept=critical1.t.lower, colour="red", size=1, linetype="dashed") +
+    geom_vline(xintercept=dose1.xbar, colour="darkorange2", size=1, linetype="dashed") +
+    geom_text(aes(x=dose1.mu-0.5, label=paste0("mu = ",dose1.mu), y=.17), colour="blue", angle=90)+
+    geom_text(aes(x=critical1.t.upper-0.5, label=paste0("critical = ",critical1.t.upper), y=.17), colour="red", angle=90) +
+    geom_text(aes(x=critical1.t.lower-0.5, label=paste0("critical = ",critical1.t.lower), y=.17), colour="red", angle=90) +
+    geom_text(aes(x=dose1.xbar-0.5, label=paste0("xbar = ",dose1.xbar), y=.17), colour="darkorange2", angle=90) 
+
+plot_dose1
+```
+Let's walk through the results visually:  
+We plotted two density distributions (blue for VC and orange for OJ).  
+We estimated t distribution by drawing the curve in solid blue, with mean=mu and std dev=std err.  
+We added 4 dashed lines: blue as Ho mean, orange as Ha mean, and red as critical lines where we chop off the tails.  Ho holds inside the red lines, Ho gets rejected outside the red lines. See Appendix B for R code on how we calculated the 4 lines.
+ 
+We hope the visual result tells the story - the orange mean falls outside of the critical red lines, which makes us reject Ho and accept Ha.  We're 95% confident the alternative mean is not due to chance, but there's still a 5% chance of type 1 error.
+
+Dose 2 = 1.5 mg   
+We repeated steps 4 and 5, produced similar results, and rejected Ho in favor of Ha.  See Appendix C.
+
+Dose 3 = 2 mg  
+Step 4.  Calculate 95% CIs using R t.test().
+```{r echo=FALSE, fig.width=9}
+
+dose3.VC<-dose3[dose3$supp=="VC",]
+dose3.OJ<-dose3[dose3$supp=="OJ",]
+dose3.mu<-mean(dose3.VC$len)
+dose3.xbar<-mean(dose3.OJ$len)
+dose3.stderr<-((sd(dose3[dose3$supp=="OJ",]$len)^2)/n + (sd(dose3[dose3$supp=="VC",]$len)^2)/n)^(1/2)
+
+#manual
+#calculate df, a complicated formula for t independent groups with unequal variances
+dose3.df.num<-((sd(dose3[dose3$supp=="OJ",]$len)^2)/n + (sd(dose3[dose3$supp=="VC",]$len)^2)/n)^2
+dose3.df.denom<-((sd(dose3[dose3$supp=="OJ",]$len)^2)/n)^2/(n-1) + ((sd(dose3[dose3$supp=="VC",]$len)^2)/n)^2/(n-1)
+dose3.df<-dose3.df.num/dose3.df.denom 
+#now with df, can calculate t value
+dose3.tvalue<-qt(.975,df = dose3.df)
+#now have everything to calculate 95% CI
+dose3.ci.manual<-dose3.xbar-dose3.mu+c(-1,1)*dose3.tvalue*dose3.stderr
+
+#run R test.t function and compare results
+dose3.ci.t.test<- t.test(len ~ supp, paired = FALSE, conf.level = .95, var.equal = FALSE, data = dose3)$conf
+dose3.pvalue<-t.test(len ~ supp, paired = FALSE, conf.level = .95, var.equal = FALSE, data = dose3)$p.value
+
+rbind(
+    dose3.ci.t.test,
+    dose3.ci.manual)    
+```
+Step 5.  Draw conclusions  
+Based on the 95% CI, which does contain 0, we retain Ho and don't have enough evidence to support Ha.  
+Function t.test returns p-value: `r round(dose3.pvalue,4)`, which is larger than alpha, and means that the difference in means is random.  Our hypothetical researchers don't have enough evidence against absorbic acid at 2 mg! They can use the p-value to confirm the results at any desired level of significance.
+
+```{r echo=FALSE}
+#dataframe
+len3 <- c(dose3.VC$len, dose3.OJ$len)
+supp3 <- as.factor(c(rep("VC", 10), rep("OJ", 10)))
+df3 <- data.frame(len=len3,  supp=supp3)
+critical3.t.upper<-round(dose3.mu + dose3.tvalue*dose3.stderr,2)
+critical3.t.lower<-round(dose3.mu - dose3.tvalue*dose3.stderr,2)
+
+## draw  
+plot_dose3 <- ggplot(df3, aes(len, fill=supp)) + 
+    geom_density(alpha=.5) + 
+    stat_function(fun = dnorm, args = list(mean=dose3.mu, sd=dose3.stderr), color="blue", size=1) +
+    ggtitle("Fig 2. Dose 2 mg, VC vs. OJ  - retain Ho") +
+    scale_fill_manual(values = c("orange", "blue")) + 
+    guides(fill=guide_legend(title=NULL)) + 
+    geom_vline(xintercept=dose3.mu, colour="blue", size=1, linetype="dashed") +
+    geom_vline(xintercept=critical3.t.upper, colour="red", size=1, linetype="dashed") +
+    geom_vline(xintercept=critical3.t.lower, colour="red", size=1, linetype="dashed") +
+    geom_vline(xintercept=dose3.xbar, colour="darkorange2", size=1, linetype="dashed") +
+geom_text(aes(x=dose3.mu+0.5, label=paste0("mu = ", dose3.mu), y=.14), colour="blue", angle=90) +
+geom_text(aes(x=critical3.t.upper-0.5, label=paste0("critical = ",critical3.t.upper), y=.14), colour="red", angle=90) +
+geom_text(aes(x=critical3.t.lower-0.5, label=paste0("critical = ",critical3.t.lower), y=.14), colour="red", angle=90) +
+geom_text(aes(x=dose3.xbar-0.5, label=paste0("xbar = ",dose3.xbar), y=.14), colour="darkorange2", angle=90) 
+
+plot_dose3
+```
+
+Let's visually interpret our results again:  
+We plotted two density distributions (blue for VC and orange for OJ).  
+We estimated t distribution by drawing the curve in solid blue, with mean=mu and std dev=std err.  
+We added 4 dashed lines: blue as Ho mean, orange as Ha mean, and red as critical lines where we chop off the tails.  Ho holds inside the red lines, Ho gets rejected outside the red lines.   
+ 
+We hope the visual result tells the story - the orange mean is pretty close to the blue mean and quite far from the red lines.  We retain Ho with 95% confindence about no difference between OJ vs VC, but still have 5% chance of type 2 error.  
+
+## Conclusion
+It looks like the guniea pigs dental health depends on their daily dose: at 0.5 or 1 mg daily dose - they're better off with OJ; at 2 mg - there's no need to swtich between VC or OJ.  Our hypothetical researchers only found evidence of better OJ performance at smaller doses, while the larger dose was equally effective.
+\newpage
+
+## Appendix A. Exploratory data analysis
+R documntetaion provides a graphic that shows performance by supplement type at each dose:
+  
+```{r echo=FALSE, fig.height=4}
+require(graphics)
+coplot(len ~ dose | supp, data = ToothGrowth, panel = panel.smooth,
+       xlab = c("ToothGrowth data: length vs dose, given type of supplement", "R Graph of ToothGrowth dataset"))
+```
+
+By visually examinging the data, we detect an increase in tooth growth with a higher dose, both in orange juice (OJ) and ascorbic acid (VC) delivery methods.  
+
+## Appendix B. R code - calculate CIs for 0.5 mg dose
+This part provides code that was used to calculate CIs for 0.5 mg dose for the following scenario:
+compare 2 independent groups OJ vs VC, not paired, unequal variance, alpha=.05, two-tailed.
+First, we performed manual calculations, then we ran R t.test() to find CIs faster, and compared the results.
+
+```{r}
+n<-10
+df<-n-1
+
+#dose 1 = 0.5 mg
+dose1 <- subset(ToothGrowth, dose==0.5) #subset
+
+#1) manual calculations
+dose1.VC<-dose1[dose1$supp=="VC",]
+dose1.OJ<-dose1[dose1$supp=="OJ",]
+dose1.mu<-mean(dose1.VC$len)
+dose1.xbar<-mean(dose1.OJ$len)
+dose1.stderr<-((sd(dose1[dose1$supp=="OJ",]$len)^2)/n + 
+        (sd(dose1[dose1$supp=="VC",]$len)^2)/n)^(1/2)
+
+#calculate df, a complicated formula for t independent groups with unequal variances
+dose1.df.num<-((sd(dose1[dose1$supp=="OJ",]$len)^2)/n + 
+        (sd(dose1[dose1$supp=="VC",]$len)^2)/n)^2
+dose1.df.denom<-((sd(dose1[dose1$supp=="OJ",]$len)^2)/n)^2/(n-1) + 
+        ((sd(dose1[dose1$supp=="VC",]$len)^2)/n)^2/(n-1)
+dose1.df<-dose1.df.num/dose1.df.denom 
+
+#now with df, can calculate t value
+dose1.tvalue<-qt(.975,df = dose1.df)
+#now have everything to calculate 95% CI
+dose1.ci.manual<-dose1.xbar-dose1.mu+c(-1,1)*dose1.tvalue*dose1.stderr
+
+
+#2) run R test.t function
+dose1.ci.t.test<- t.test(len ~ supp, paired = FALSE, conf.level = .95, var.equal = FALSE, 
+        data = dose1)$conf
+dose1.pvalue<-t.test(len ~ supp, paired = FALSE, conf.level = .95, var.equal = FALSE, 
+        data = dose1)$p.value
+
+#3) compare results
+rbind(
+    dose1.ci.t.test,
+    dose1.ci.manual)    
+```
+
+Our manual and R calculated results match!  By going through the steps manually, we gained better understanding how to find CIs for this specific and other scenarios.  By comparing the results, we learned how to to apply R skills to find the same results faster.  
+
+Finally let's review how we calculated values in Fig 1:  
+mu = dose1.mu - we took VC mean as original mean mu (aka Ho mean)   
+xbar = dose1.xbar - we used OJ mean as new estimated sample mean (aka Ha mean)  
+std err = dose1.stderr - we calculated its estimated std error, using a complicated formula for unequal variances  
+t value = dose1.tvalue - number of std errors above mu, where we chop off the tails  
+We used t value to calculate critical values, upper and lower, that designate rejection regions. 
+```{r}
+critical1.t.upper<-round(dose1.mu + dose1.tvalue*dose1.stderr,2)
+critical1.t.lower<-round(dose1.mu - dose1.tvalue*dose1.stderr,2)
+```
+
+We presented our story visually and supported it with key data in the main part of the paper.  We hope it helps with understanding how we made our decisions about retaining or rejecting Ho. 
+
+## Appendix C.  Dose 2 = 1.5 mg, quick t.test() and results
+
+```{r}
+#run R test.t function and compare results
+dose2.ci.t.test<- t.test(len ~ supp, paired = FALSE, conf.level = .95, var.equal = FALSE, 
+        data = dose2)$conf
+dose2.pvalue<-round(t.test(len ~ supp, paired = FALSE, conf.level = .95, var.equal = FALSE, 
+        data = dose2)$p.value,4)
+
+dose2.ci.t.test 
+```
+
+Based on the 95% CI, which doesn't contain 0, we reject Ho in favor of Ha.  
+Function t.test returns p-value: `r round(dose1.pvalue,4)`, which is smaller than .025 (half of alpha due to two-sided test) and means that the difference in means is mostl likely not due to chance.
+
