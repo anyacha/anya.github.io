@@ -1,0 +1,132 @@
+---
+title: "Exponentials in the Land of Asymptopia"
+author: "Anya Chaliotis"
+date: "Sep 14, 2015"
+output: pdf_document
+---
+
+## Overview
+The statistical inference theory states that in the land of Asymptopia everything works out because of the infinite amount of data. Brian Caffo's lectures demonstrated that all kinds of distributions, from normal to binomial to Poisson, comply with the Law of Large Numbers (LLN) and the Central Limit Theorem (CLT).  What about exponential distributions? This report investigates the behavior of the exponential distributions and if they also belong in the land of Asymptopia.   We will run simulations with random exponential distributions, compare the behavior of statitistics in different sample sizes, and perform basic inferential data analysis.  
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+library(ggplot2)
+```
+## 1.One Larger Sample: Simulation and Inferential Analysis
+We simulate the exponential distribution in R with rexp(n, lambda) where lambda is the rate parameter. Our lambda = 0.2. First, we got acquainted with one random exponential distribution of 1000 exponentials:
+```{r}
+#the distribution of a large collection of (1000) random exponentials 
+lambda<-0.2
+rexp.size <- 1000
+rexp<-rexp(rexp.size, lambda)
+```
+
+```{r echo=FALSE, fig.width=9}
+#theoretical numbers
+theoretical.mean<-1/lambda
+theoretical.sd<-1/lambda
+#1 large sample numbers
+rexp.mean<-round(mean(rexp),2)
+rexp.sd<-round(sd(rexp),2)
+
+#draw figures
+#plot(rexp)
+hist(rexp, main="Fig 1.  Histogram of a random exponential distribution - skewed, not normal",xlab="x", col="blue" )
+abline(v=theoretical.mean, col="red",lwd="3", lty=2)
+#add a value to abline
+#src http://stackoverflow.com/questions/10550520/how-to-plot-the-value-of-abline-in-r
+axis(1, at=rexp.mean,labels=theoretical.mean)
+```
+
+As we suspected, an exponential distribution is not normal.  How close is our sample to asymptotic "perfect" characteristics?  The red line shows the theoretical mean.  
+Theoretical mean = `r theoretical.mean` vs. Sample mean  = `r rexp.mean`    
+Theoretical variance = `r theoretical.sd^2` vs. Sample variance = `r round(rexp.sd^2,2)`  
+Theoretical std dev = `r theoretical.sd` vs. our sample std dev = `r rexp.sd`  
+Very close approximations of the population parameters, thanks to the fairly large sample size!
+
+Another way to examine how our sample mean behaves is to look at the sample cumulative means: 
+```{r echo=FALSE, fig.height=3}
+#plot means
+rexp.means.cum <- cumsum(rexp) / (1  : rexp.size)
+g <- ggplot(data.frame(x = 1 : rexp.size, y = rexp.means.cum), aes(x = x, y = y)) 
+g  + geom_hline(yintercept = theoretical.mean, col="red", linetype="dashed", size=1.5) + geom_line(size = 1) +
+    labs(x = "Number of observations", y = "Cumulative mean") +
+    ggtitle("Fig 2. Cumulative means in a sample of 1000")
+```
+
+Plotting the cumulative means, we see the LLN in action: our sample mean shows significant variability ealry on, but in a long run, as the sample size grows, the mean gets closer and closer to the theoretical mean (depicted by the red line)!
+
+## 2.Many Smaller Samples: Simulation and Inferential Analysis
+Since we're still in the land of Asymptopia, there's more data for us to play with.  One large sample was great, but we can also look at smaller samples and their means.  We performed 10, 100, and 1000 simulations of samples, each size 40, and looked at the distribution of their averages:
+```{r cache=TRUE, echo=FALSE, fig.height=4}
+#the distribution of a large collection of averages of 40 exponentials
+sample.size<-40
+#define a function that takes in  number of simulations and returns a sampling distribution of means
+simulate.rexp.sampling.dist <- function(simulations.num) {
+    sampling.dist = NULL
+    for (i in 1 : simulations.num) sampling.dist = c(sampling.dist, mean(rexp(sample.size, lambda)))
+    sampling.dist
+} 
+
+dat <-data.frame(
+    x=c(simulate.rexp.sampling.dist(10),
+        simulate.rexp.sampling.dist(100),
+        simulate.rexp.sampling.dist(1000)),
+    size = factor(rep(c(10, 100, 1000),times = c(10,100,1000))))
+```
+
+```{r echo=FALSE, fig.width=9}
+#draw figures
+g <- ggplot(dat, aes(x=x, fill=size)) + geom_histogram(binwidth=.3, colour = "black", aes(y = ..density..)) 
+g <- g + stat_function(fun = dnorm, args = list(mean = 5, sd = 5/sqrt(100)), color="blue3", size=1.5) 
+g + facet_grid(. ~ size) + geom_vline(xintercept = theoretical.mean, color="red", size=1.5, , linetype="dashed") + ggtitle("Fig 3.  Comparison of sampling distributions - becomes normal as the size grows") +
+scale_x_discrete(limit=2:8)
+```
+(Refer to Appendix A for R code to simulate data.)
+
+Our theoretical means are depicted in red, and for visual comparison, we added density of the standard  normal in blue.  Side by side, these three sampling distributions show the transformation of the distribution shape from fairly chaotic (10 simulations) to normal (1000 simulations).  Just like the CLT claims, the sampling distribution of means becomes that of a standard normal as the sample size increases.  We demonstrated the CLT at work, even with skewed data such as exponential distributions!  
+
+Let's closer examine cumulative means of our sampling distribution with 1000 simulations:  
+```{r echo=FALSE, fig.width=9}
+#plot cumulative means
+simulations.num<-1000
+sampling.dist1000 <- simulate.rexp.sampling.dist(simulations.num)
+sampling.dist1000.cum <- cumsum(sampling.dist1000) / (1  : simulations.num)
+g <- ggplot(data.frame(x = 1 : simulations.num, y = sampling.dist1000.cum), aes(x = x, y = y)) 
+g  + geom_hline(yintercept = theoretical.mean, col="red", linetype="dashed", size=1.5) + geom_line(size = 1) +
+    labs(x = "Number of samples", y = "Cumulative mean") +
+    ggtitle("Fig 4. Cumulative means in a sampling distribution")
+
+sampling.dist1000.mean<-round(mean(sampling.dist1000),2)
+sampling.dist1000.sd<-round(sd(sampling.dist1000),2)
+theoretical.dist1000.sd<-round(theoretical.sd/sqrt(40),2)
+```
+
+Lastly, we'll compare the means and std error of 1000 samples, each size 40, to the theoretical characteristics.  
+Theoretical mean = `r theoretical.mean` vs. Sample mean  = `r sampling.dist1000.mean`  
+Theoretical std error = `r theoretical.dist1000.sd` vs. Sample std error = `r sampling.dist1000.sd`  
+
+With more samples, variance of sample means becomes smaller and we can be more confident in using the sample statistic, i.e. mean, as an estimate of the population mean.
+Note that the standard error of the sampling distribution is quite smaller than the standard deviation of our first sample.  The standard deviation shows variability of distribution values, while the standard error indicates variability in sample means.  Standard error becomes smaller as the sample size grows, which confirms the theory that with larger samples we can arrive at better estimates of the population mean.
+
+## Conclusion
+It was nice to visit the land of Asymptopia, where data is close to infinite and everything works perfectly.  With the LLN, we showed that 1 large collection mean got closer and closer to the population mean as the number of data points increased.  With the CLT, we showed that even with smaller samples, as long as we have many of them, we get to the "perfect" parameters sooner.  While the exponential distribution itself is skewed and not normal, the sampling distribution of its means is approximately normal with a sample mean approximating the population mean and a variance given by the standard error of the mean.  The CLT is extremely useful in inferential statistics!
+\newpage
+
+## Appendix A.
+R code to simulate data for Fig 3: Comparison of sampling distributions with sample size=40 and number of simulations 10, 100 and 1000.
+```{r cache=TRUE, eval=FALSE}
+#the distribution of a large collection of averages of 40 exponentials
+sample.size<-40
+#define a function that takes in  number of simulations and returns a sampling distribution of means
+simulate.rexp.sampling.dist <- function(simulations.num) {
+    sampling.dist = NULL
+    for (i in 1 : simulations.num) sampling.dist = c(sampling.dist, mean(rexp(sample.size, lambda)))
+    sampling.dist
+} 
+
+dat <-data.frame(
+    x=c(simulate.rexp.sampling.dist(10),
+        simulate.rexp.sampling.dist(100),
+        simulate.rexp.sampling.dist(1000)),
+    size = factor(rep(c(10, 100, 1000),times = c(10,100,1000))))
+```
