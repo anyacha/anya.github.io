@@ -1,5 +1,6 @@
 ---
-title: "DataSci - Multivariable Regression"
+title: "DataSci - Regression Models"
+subtitle: "Multivariable Regression"
 author: "Anya Chaliotis"
 date: "June 30, 2016"
 output: html_document
@@ -35,24 +36,25 @@ All variables but ‘Fertility’ give proportions of the population.
 ```{r echo=FALSE}
 summary(swiss)
 ```
-#### Marginal plots 
+#### Marginal Plots with Correlation
 The marginal relationship of interest without considering the other variables.
-```{r}
-pairs(swiss, panel = panel.smooth, main = "Swiss data", col = 3 + (swiss$Catholic > 50))
-```
+```{r echo=FALSE}
+#original 
+#pairs(swiss, panel = panel.smooth, main = "Swiss data", col = 3 + (swiss$Catholic > 50))
 
-#### Marginal plots with correlation 
-```{r}
-### more informative plot, with LM
-#require(GGally); require(ggplot2)
-my_fn <- function(data, mapping, ...){
-p <- ggplot(data = data, mapping = mapping) + 
-    geom_point() + 
-    geom_smooth(method=lm, fill="blue", color="blue", ...)
-p
+#with correlation
+#src: https://stat.ethz.ch/R-manual/R-devel/library/graphics/html/pairs.html
+panel.cor <- function(x, y, digits = 2, prefix = "", ...)
+{
+    usr <- par("usr"); on.exit(par(usr))
+    par(usr = c(0, 1, 0, 1))
+    r <- cor(x, y)
+    txt <- format(c(r, 0.123), digits = digits)[1]
+    txt <- paste0(prefix, txt)
+    text(0.5, 0.5, txt, cex = if (abs(r)<.25) {.6} else { abs(r)*2})
 }
-g <- ggpairs(swiss, lower=list(continuous=my_fn))
-g
+
+pairs(swiss, lower.panel = panel.smooth,  upper.panel = panel.cor, main = "Swiss data", col=3 + (swiss$Catholic > 50))
 ```
 
 ### Regression Models
@@ -168,6 +170,36 @@ g1
 
 Adding an interaction term changed slopes of Catholic vs Protestant lines.
 
+### Residuals and Diagnostics
+The reason we look at residual plots is because they zoom on potential problems with our model. They probe your data in different ways to diagnose different problems. 
+```{r}
+par(mfrow=c(2,2))
+plot(fit_all)
+```
+
+In the Residuals vs the Fitted values, we look for any systematic pattern. If there's any systematic pattern in your residual plot, that's evidence of some kind of lack of fit.  
+The Q-Q plot is specifically designed to evaluate normality of the error terms.  
+This Scale-location plot is plotting the standardized residuals (the ordinary residuals but standardized), so they have a more comparable scale across subject (similar to a t-statistic).    Leverage measures (hat values) can be useful for diagnosing data entry errors.  
+By looking at these plots, none of these look too inherently bad, so didn't find any indications of a poor model fit.
+
+### Model Selection
+Test whether or not the inclusion of the additional set of extra terms is necessary with the ANOVA function.
+```{r}
+fit1 <- lm(Fertility ~ Agriculture, data = swiss)
+fit3 <- update(fit1, Fertility ~ Agriculture + Examination + Education)
+fit5 <- update(fit1, Fertility ~ Agriculture + Examination + Education + Catholic + Infant.Mortality)
+anova(fit1, fit3, fit5)
+
+fit1 <- lm(Fertility ~ Agriculture, data = swiss)
+a <- summary(fit1)$cov.unscaled[2,2]
+fit2 <- update(fit1, Fertility ~ Agriculture + Examination)
+fit3 <- update(fit1, Fertility ~ Agriculture + Examination + Education)
+  c(summary(fit2)$cov.unscaled[2,2],
+    summary(fit3)$cov.unscaled[2,2]) / a 
+```
+This gives you the F statistic and the P value associated with each of them, then here it shows that yes, the inclusion of education+examination information appears to be necessary when we're just looking at agriculture by itself.  Then, the inclusion of Catholic + Infant.Mortality appears to be necessary beyond just including examination, education and agriculture.
+
+
 ### Citations
 Caffo, B (2016). Coursera Course, "Regression Models", Johns Hopkins Universtiy.  Retrieved from https://github.com/bcaffo/courses/tree/master/07_RegressionModels.
 
@@ -183,8 +215,6 @@ z <- swiss$Agriculture + swiss$Education
 lm(Fertility ~ . + z, data = swiss)
 ```
 z is nothing other than agriculture plus education, added together. It has no added value. We've already included education and we've already included agriculture in our joint model. z adds no new linear information, since it's a linear combination of variables already included. All the coefficients stayed the same.  R just drops terms that are linear combinations of other terms.  If you see an NA in r after you fit a linear model, then probably the most likely culprit is you've included a variable that is either numerically or exactly a linear combination of the other variables.
-
-
 
 
 ```{r eval=FALSE, echo=FALSE}
@@ -210,5 +240,6 @@ p
 g = ggpairs(swiss,columns = 1:4, lower = list(continuous = my_fn))
 g
 ```
+
 
 
