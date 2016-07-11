@@ -1,0 +1,168 @@
+---
+title: "DataSci - Logistic Regression"
+subtitle: "Modeling Probabilities of Ravens Win"
+author: "Anya Chaliotis"
+date: "July 10, 2016"
+output: html_document
+---
+
+This work is a replication of an examaple from a Coursera course offered by Johns Hopkins University, Data Science, Regression Models.  See citations section for source of code and learning concepts.
+
+### Theory
+Logistic regression focuses on instances where the outcome is a 0/1 random variable (aslo know as as binomial or Bernoulli). We model the data as if it's a bunch of coin flips, where a success probability potentially depends on a collection of covariates. Instead of a linear fit, it's more appropriate to model the odds.  
+
+Odds and probabilities are interchangeable:  
+$$Odds=\frac{p}{1-p} <-->\ Probabilty\  p=\frac{odds}{1+odds}$$
+
+The clever bit of generalizng the logistic regression is that we're not actually putting the model on the scale, not defining an equality between the outcomes and the linear regression parameters. Instead we're putting the model on the log of the odds.  
+
+Logistic model:  
+$$Logit = log(\frac{p}{1-p}) = \beta_0  + \beta_1 X_{i}  + \epsilon_{i}$$
+Back to probabilities, the equation can be rewritten as:
+$$p = \frac{e^{\beta_0  + \beta_1 X_{i1}}}{1+e^{\beta_0  + \beta_1 X_{i1}}}$$
+
+Interpeting Odds Ratios:  
+- Not probabilities, functions of probabilities  
+- Odds ratio of 1 = no difference in odds  
+- Log odds ratio of 0 = no difference in odds  
+
+
+### Logistic Regression with Ravens Data
+We want to model the probability that Ravens win.  The success probability will differ from game to game depending on how many points the Ravens score.
+
+```{r echo=FALSE, message=FALSE}
+### 0 setup
+setwd("/Users/Amigo/Desktop/Coursera/myPortfolio/Ravens/")
+
+```
+
+#### 1. Load data
+```{r}
+#load Ravens data
+#download.file("https://dl.dropboxusercontent.com/u/7710864/data/ravensData.rda"
+#              , destfile="./data/ravensData.rda",method="curl")
+load("./data/ravensData.rda")
+head(ravensData)
+```
+
+#### 2. Fit Logistic Regression
+```{r}
+## Ravens logistic regression
+fit <- glm(ravenWinNum ~ ravenScore,family="binomial", data=ravensData)
+summary(fit)
+# Coefficients:
+#             Estimate Std. Error z value Pr(>|z|)
+# (Intercept) -1.68001    1.55412  -1.081     0.28
+# ravenScore   0.10658    0.06674   1.597     0.11
+```
+Fitted model:  
+$$Logit = log(\frac{P_{win}}{1-P_{win}}) = `r round(fit$coef[1],2)` + `r round(fit$coef[2],2)` * RavenScore$$
+
+$$p_{win} = \frac{e^{\beta_0  + \beta_1 X_{i1}}}{1+e^{\beta_0  + \beta_1 X_{i1}}}$$
+
+$$p_{win} = \frac{e^{`r round(fit$coef[1],2)`+ `r round(fit$coef[2],2)` * RavenScore}} {1+e^{`r round(fit$coef[1],2)`+ `r round(fit$coef[2],2)` * RavenScore}}$$ 
+
+#### 3. Interpreting Coefficients
+$\beta_0$: the log odds or Ravens win if score 0 (not always meaningful)  
+exp($\beta_0$): probability of Ravens win if score 0 (not always meaningful)  
+$\beta_1$: the log odds ratio of win probability for each point scored (compared to 0)  
+exp($\beta_1$): the factor by which the odds of winning increase with every point scored
+
+$\beta_1$=`r round(fit$coef[2],2)`  
+It's the increase in the log odds of the probability that the Ravens win associated with one point increase in score (if this was multivariate regression, holding the other regression variables fixed).
+
+exp($\beta_1$)=`r round(exp(fit$coef[2]),2)`  
+It's an 11% increase in the probability of winning for every additional points that the Ravens score.
+
+#### 3a. Logistic Regression - Simplified
+```{r fig.height=4, fig.width=6}
+#plot the first 3 scores and their fitted values
+plot(ravensData$ravenScore[1:3],fit$fitted[1:3], main="Ravens' first 3 games", xlab="Ravens score", ylab="Probability of winning", pch=19, col="blue", frame=FALSE)
+```
+
+Score=`r ravensData$ravenScore[1]`   
+Log(odds) = `r fit$coef[1]` + `r fit$coef[2]` x `r ravensData$ravenScore[1]` = `r fit$coef[1] + fit$coef[2]* ravensData$ravenScore[1]`    
+Prob(win) = exp(`r fit$coef[1]` + `r fit$coef[2]` x `r ravensData$ravenScore[1]`) / 1 + exp(`r fit$coef[1]` + `r fit$coef[2]` x `r ravensData$ravenScore[1]`) = `r exp(fit$coef[1] + fit$coef[2]* ravensData$ravenScore[1]) / (1+exp(fit$coef[1] + fit$coef[2]* ravensData$ravenScore[1]))`
+
+Score=`r ravensData$ravenScore[2]`   
+Log(odds) = `r fit$coef[1]` + `r fit$coef[2]` x `r ravensData$ravenScore[2]` = `r fit$coef[1] + fit$coef[2]* ravensData$ravenScore[2]`    
+Prob(win) = exp(`r fit$coef[1]` + `r fit$coef[2]` x `r ravensData$ravenScore[2]`) / 1 + exp(`r fit$coef[1]` + `r fit$coef[2]` x `r ravensData$ravenScore[2]`) = `r exp(fit$coef[1] + fit$coef[2]* ravensData$ravenScore[2]) / (1+exp(fit$coef[1] + fit$coef[2]* ravensData$ravenScore[2]))`  
+
+Score=`r ravensData$ravenScore[3]`   
+Log(odds) = `r fit$coef[1]` + `r fit$coef[2]` x `r ravensData$ravenScore[3]` = `r fit$coef[1] + fit$coef[2]* ravensData$ravenScore[3]`    
+Prob(win) = exp(`r fit$coef[1]` + `r fit$coef[2]` x `r ravensData$ravenScore[3]`) / 1 + exp(`r fit$coef[1]` + `r fit$coef[2]` x `r ravensData$ravenScore[3]`) = `r exp(fit$coef[1] + fit$coef[2]* ravensData$ravenScore[3]) / (1+exp(fit$coef[1] + fit$coef[2]* ravensData$ravenScore[3]))`  
+
+What about score=0?  
+Log(odds) = `r fit$coef[1]` + `r fit$coef[2]` x 0 = `r fit$coef[1] + fit$coef[2]* 0`  
+Prob(win) = exp(`r fit$coef[1]` + `r fit$coef[2]` x 0) / 1 + exp(`r fit$coef[1]` + `r fit$coef[2]` x 0) = `r exp(fit$coef[1] + fit$coef[2]* 0) / (1+exp(fit$coef[1] + fit$coef[2]* 0))`  
+In this case, the result is meaningless, as Ravens can't win with 0 points.  
+
+#### 4. Predict Ravens Win Based on Score
+Using predict() returns the model's log odds estimates for the given scores, which we convert to probabilities.
+
+```{r}
+#log odds estimates
+logodds <- predict(fit, data.frame(ravenScore=ravensData$ravenScore[1:3]))
+#convert log odds to probabilities
+exp(logodds)/(1+exp(logodds))
+```
+
+Or even better, use the model fitted values, which does the conversion and conveniently returns probability estimates.
+```{r}
+fit$fitted[1:3]
+```
+We see the same values as we calculated manually.
+
+#### 5. Ravens Fitted Curve
+Predicted responses put back on the probability scale
+```{r}
+plot(ravensData$ravenScore,fit$fitted,pch=19,col="blue",xlab="Score",ylab="Prob Ravens Win", , frame=FALSE)
+```
+
+As the score goes up, win probabilities are higher!  The actual curve would be an s-curve. 
+We only see part of the fitted S curve because of where the data actually are observed was restricted (lowest score of 9 with the prob around 33% ). 
+
+### Conclusion
+A person could make a lot of money betting against this model. When the Ravens score no points, the model might like 16 to 84 odds. As it turns out, though, the model is not that sure of itself. The estimated coefficients are both within 2 standard errors of zero.  In other words, Ravens score adds very little to a model which just guesses that the Ravens win with probability 70% (their actual record that season) or odds 7 to 3 is almost as good. 
+```{r}
+#verify a model with 70% probability
+fit70 <-  glm(ravenWinNum ~ 1, binomial, ravensData)
+summary(fit70)$coef
+#odds 7/3
+7/3
+#models odds
+exp(fit70$coef[1])
+#probability
+exp(fit70$coef[1])/(1+exp(fit70$coef[1]))
+```
+
+### Citations
+Caffo, B (2016). Coursera Course, "Regression Models", Johns Hopkins Universtiy.  Retrieved from https://github.com/bcaffo/courses/tree/master/07_RegressionModels.
+
+### Xtra 
+#### Odds ratios and confidence intervals
+Prefer to look on the exponentiated scale, therefore exponentiate the Ravens coefficients
+```{r}
+exp(fit$coef)
+```
+That suggests an 11% increase in the probability of winning for every additional points that the Ravens score.
+```{r}
+exp(confint(fit))
+```
+Our interval does contain one, it goes from 0.99 to 1.3. Even though we for sure know that scoring points is what causes the Ravens to win the game, this coefficient turns out to not be significant.
+
+#### Linear Models for Ravens?
+Don't model this data as linear regression.  The model is the slope of a straight line, which doesn't address the questions about win/lose probabilities.  
+```{r}
+lm <- lm(ravensData$ravenWinNum ~ ravensData$ravenScore)
+summary(lm)$coef
+
+plot(ravensData$ravenScore, lm$fitted.values, pch=19, col="blue", main="Linear Model is Not Interpretable", xlab="Ravens score", ylab="Model fitted values" , frame=FALSE)
+```
+
+```{r eval=FALSE}
+#useful resources for R markdown formulas 
+#src http://www.montana.edu/rotella/documents/502/MarkdownEqnExamples.Rmd
+#http://www.statpower.net/Content/310/R%20Stuff/SampleMarkdown.html
+```
+
