@@ -81,8 +81,8 @@ We see  many variables strongly correlated with mpg: 'cyl', 'disp', 'hp', and 'w
 ### 2. Research Hypothesis 
 Linear model in the form: Y= $\beta_0 + \beta_1 x + \epsilon$  
 Using inferential statistics, we formulate our hypothesis for the slope of transmission type  as:  
-Ho: $\beta_1$ = 0 slope is 0  
-Ha: $\beta_1$ $\neq$ 0 slope is not 0  
+Ho:$\beta_1$ = 0 slope is 0  
+Ha:$\beta_1$ != 0 slope is not 0  
 We assume significance level $\alpha$=5%.
 
 #### 2a. Simple Linear Regression
@@ -116,59 +116,97 @@ Interestingly, when modeled together none of the variables show statistical sign
 ANOVA, on the other hand, thinks that 'cyl','disp' and 'wt' matter when it comes to difference in mpg.
 
 ### 3. Model Selection
-To determine the best fit model, we perform a stepwise model selection procedure.  
-```{r  results='hide'}
-library(MASS)
-fit_stepwise <- stepAIC(fit_all, trace=FALSE)
-summary(fit_stepwise)
-## Coefficients:
+Since we don't have consistent hints and avoid using automated model selection packages (for the purpose of this analysis only) , we took the nested model approach. We start with transmission as the only predictor and iteratively add another predictor to compare fits.  (This technique is also known as stepwise forward selection.)
+```{r echo=FALSE}
+#automate anova, comparing nested models
+anova_nested <- function() {
+    # Store anova results of linear models with different independent variables
+    anova <- anova(lm(mpg ~ am, mtcars),
+                   lm(mpg ~ am+cyl, mtcars),    
+                   lm(mpg ~ am+cyl+disp, mtcars),
+                   lm(mpg ~ am+cyl+disp+hp, mtcars),
+                   lm(mpg ~ am+cyl+disp+hp+drat, mtcars),
+                   lm(mpg ~ am+cyl+disp+hp+drat+wt, mtcars),
+                   lm(mpg ~ am+cyl+disp+hp+drat+wt+qsec, mtcars),
+                   lm(mpg ~ am+cyl+disp+hp+drat+wt+qsec+vs, mtcars),
+                   lm(mpg ~ am+cyl+disp+hp+drat+wt+qsec+vs+gear, mtcars),
+                   lm(mpg ~ am+cyl+disp+hp+drat+wt+qsec+vs+gear+carb, mtcars))
+    print(anova)
+}
+#run the fn anova_nested() to see how the addition of variables affects the models with 'am' as a predictor
+anova_nested()
+```
+ANOVA recommends 'cyl','disp','hp', 'wt' as the most promising predictors.  Next, we trust ANOVA and create a smaller model.
+```{r results='hide'}
+#keep only variants that showed a sign of significance
+fit_reduced <-  lm(mpg ~ am+cyl+disp+hp+wt, mtcars)
+summary(fit_reduced)$coef
+##              Estimate Std. Error t value Pr(>|t|)    
+## (Intercept) 33.864276   2.695416  12.564 2.67e-12 ***
+## ammanual     1.806099   1.421079   1.271   0.2155    
+## cyl6        -3.136067   1.469090  -2.135   0.0428 *  
+## cyl8        -2.717781   2.898149  -0.938   0.3573    
+## disp         0.004088   0.012767   0.320   0.7515    
+## hp          -0.032480   0.013983  -2.323   0.0286 *  
+## wt          -2.738695   1.175978  -2.329   0.0282 *  
+```
+Using ANOVA, we compare *fit_reduced* to *fit_all*. 
+```{r results='hide'}
+anova(fit_reduced, fit_all)
+## Model 1: mpg ~ am + cyl + disp + hp + wt
+## Model 2: mpg ~ cyl + disp + hp + drat + wt + qsec + vs + am + gear + carb
+##  Res.Df    RSS Df Sum of Sq      F Pr(>F)
+## 1    25 150.41
+## 2    15 120.40 10    30.006 0.3738 0.9397
+```
+A large p-value indicates no significant improvement with a larger, more complicated model.  
+
+We also examine why 'disp' in the new reduced model is no longer significant.
+```{r results='hide'}
+#check why 'disp' is not significant now
+vif(fit_reduced)[,3]
+##       am      cyl     disp       hp       wt
+## 1.609627 1.767751 3.591864 2.176258 2.611892
+
+```
+VIF analysis suggests a strong collinearity of 'disp' with other regressors. So we omit 'disp', reduce the model again, do ANOVA comparison, and check for collinearity of the explanatory variables.
+```{r results='hide'}
+#one more reductive iteration
+fit_reduced2 <-  lm(mpg ~ am+cyl+hp+wt, mtcars)
+summary(fit_reduced2)$coef
 ##             Estimate Std. Error t value Pr(>|t|)    
 ## (Intercept) 33.70832    2.60489  12.940 7.73e-13 ***
+## ammanual     1.80921    1.39630   1.296  0.20646    
 ## cyl6        -3.03134    1.40728  -2.154  0.04068 *  
 ## cyl8        -2.16368    2.28425  -0.947  0.35225    
 ## hp          -0.03211    0.01369  -2.345  0.02693 *  
 ## wt          -2.49683    0.88559  -2.819  0.00908 ** 
-## ammanual     1.80921    1.39630   1.296  0.20646    
-```
-The resulting model recommends 'cyl', 'hp', 'wt' as the most promising predictors and no longer includes the other non-signficant terms.  
 
-Next, using ANOVA, we compare the reduced model *fit_stepwise* to *fit_all*. 
-```{r results='hide'}
-anova(fit_stepwise, fit_all)
-## Model 1: mpg ~ cyl + hp + wt + am
-## Model 2: mpg ~ cyl + disp + hp + drat + wt + qsec + vs + am + gear + carb
+anova(fit_reduced, fit_reduced2)
+## Model 1: mpg ~ am + cyl + disp + hp + wt
+## Model 2: mpg ~ am + cyl + hp + wt
 ##   Res.Df    RSS Df Sum of Sq      F Pr(>F)
-## 1     26 151.03                           
-## 2     15 120.40 11    30.623 0.3468 0.9588
-```
-A large p-value indicates that there's no significant difference between these two models.  With parsimony in mind, we favor the reduced model as the larger, more complicated model doesn't offer any significant improvements.  
+## 1     25 150.41
+## 2     26 151.03 -1  -0.61679 0.1025 0.7515
 
-For completeness, we perform variance inflation factors (VIF) analysis.  A VIF describes the increase in the variance of a coefficient due to the correlation of its regressor  with the other regressors.  In other words, it helps us find the unnecessary factors in the model.  
-```{r results='hide'}
-#check VIF for full model
-vif(fit_all)[,3]
-##      cyl     disp       hp     drat       wt     qsec       vs       am     gear     carb 
-## 3.364380 7.769536 5.312210 2.609533 4.881683 3.284842 2.843970 3.151269 2.670408 1.862838 
-
-#check VIF for reduced model
-vif(fit_stepwise)[,3]
-##      cyl       hp       wt       am 
-## 1.553515 2.168784 2.001778 1.609589 
+vif(fit_reduced2)[,3]
+## am cyl hp wt
+## 1.609589 1.553515 2.168784 2.001778
 ```
-VIF analysis of the full model suggests a strong collinearity of 'disp' with other regressors. Reduced VIF no longer indicates strong collinearity of the explanatory variables.  This concludes our process of deriving the best fit model.
+Only regressor 'am' is statitstically insignificant, but we keep it because it's at the center of our research question. All other final predictors 'wt', 'cyl','hp' show significance. ANOVA doesn't think 'disp' improves the model.  Omitting 'disp' from the model hasn't markedly decreased the VIFs for the remaining regressors.  This concludes our iterative process of deriving the best fit model.
 ```{r}
 #our best fitted model, inluding transmission as part of our research question
-fit_best <- fit_stepwise
+fit_best <- fit_reduced2
 ```
-Fitted model: mpg = `r round(summary(fit_best)$coef[1],2)` `r round(summary(fit_best)$coef[2],2)` * cyl6 `r round(summary(fit_best)$coef[3],2)` * cyl8 `r round(summary(fit_best)$coef[4],2)` * hp `r round(summary(fit_best)$coef[5],2)` * wt + `r round(summary(fit_best)$coef[6],2)` * ammanual  
+Fitted model: mpg = `r round(summary(fit_best)$coef[1],2)` + `r round(summary(fit_best)$coef[2],2)` * ammanual `r round(summary(fit_best)$coef[3],2)` * cyl6 `r round(summary(fit_best)$coef[4],2)` * cyl8 `r round(summary(fit_best)$coef[5],2)` * hp `r round(summary(fit_best)$coef[6],2)` * wt  
 The interpretation of a multivariate regression coefficient is the expected change in the response per unit change in the regressor, holding all of the other regressors constant. 
 
 $\beta_0$ intercept: cars with automatic transmission and 4 cyl with 0 horse power and 0 weight would hypothetically average 33.71 mpg.  This number is meaningless as a car with 0 horse power and 0 weight can't be a car.  
-$\beta_1$ and $\beta_2$ slopes: an expected change in mpg from 4cyl to 6cyl or 8cyl respectively.  
-$\beta_3$ slope: an expected change in mpg with 1 hp increase.  
-$\beta_4$ slope: an expected change in mpg with weight increase by 1000 lb.    
-R automatically handled the factor variables 'am' and 'cyl' by choosing automatic and 4cyl as a base level, respectively.  
-$\beta_5$ slope: a change in transmission, from automatic to manual, is expected to increase mpg by 1.81, holding all other regressors constant.  
+$\beta_1$ slope: a change in transmission, from automatic to manual, is expected to increase mpg by 1.81, holding all other regressors constant.  
+$\beta_2$ and $\beta_3$ slopes: an expected change in mpg from 4cyl to 6cyl or 8cyl respectively.  
+$\beta_4$ slope: an expected change in mpg with 1 hp increase.  
+$\beta_5$ slope: an expected change in mpg with weight increase by 1000 lb.    
+R automatically handled the factor variables 'am' and 'cyl' by choosing automatic and 4cyl as a base level, respectively.
 
 Adusted R^2^:  `r round(summary(fit_best)$adj.r.squared,2)`  
 We check the adjusted R^2^ and see a better fit: this fine-tuned model explains `r round(summary(fit_best)$adj.r.squared * 100,0)`% of the total variation.
@@ -180,42 +218,12 @@ par(mfrow=c(1,2))
 plot(fit_best, which=1)
 plot(fit_best, which=2)
 ```
-
 The residuals vs fitted plot (on the left) shows slight fluctuations around the 0 line, but no systematic pattern. In the normal probability plot (on the right), the residuals somewhat align on the line but then go off the line in the tails, with no clear outliers.  We don't detect any unusual observations.
 
-### 5. Extra: Visual 2D and 3D Exploration
-To intuitively process our findings, we show marginal and adjusted relationships.  First we explore a relationship between trasmission and mpg.  
-```{r echo=FALSE}
-#get original data, with original types
-data(mtcars)
-
-#draw plot
-plot(as.numeric(mtcars$am), mtcars$mpg, col="black", bg="darkgray", pch = 21, cex=2, main="MPG by Transmission", xlab="transmission type", ylab="mpg", frame=FALSE)
-```
-
-This plot shows us a marginal relationship between two variables.  Visually, we detect that automatic transmission (0) is less fuel-efficient than manual (1).  But it doesn't tell us anything else.  We previously determined one of other factors that impacts performance, i.e. number of cylinders.
-```{r echo=FALSE}
-#draw plot color encoded with cylinders
-par(oma=c(0, 0, 0, 5))
-plot(as.numeric(mtcars$am), mtcars$mpg, col="black", bg=mtcars$cyl/2, pch = 21, cex=2, main="MPG by Transmission and Cylinders", xlab="transmission type", ylab="mpg", frame=FALSE)
-legend(par('usr')[2], par('usr')[4], bty='n', xpd=NA,
-       c("4cyl","6cyl","8cyl"), lty=1, lwd=2, col=mtcars$cyl/2)
-```
-
-We use color to express cylinders as another dimension, which gives us more information compared to the previous simple equation.  We notice that number of cylinders matter.  We can also look at the adjusted relationship for the same data in 3D.
-```{r echo=FALSE, results='hide', eval=FALSE}
-library(rgl)
-#look in 3 dimesions, use RGL library to rotate the plot
-plot3d(mtcars$am, mtcars$cyl, mtcars$mpg, xlab="transmission", ylab="cylinders", zlab = "mpg", col=mtcars$cyl/2, pch=21, size=10)
-```
-![MPG in 3D: by Transmission and Cylinders](img_3Dplot.png)
-
-R environment allows us to rotate the plot and explore all 3 dimensions.  Here, we provide a screenshot that shows that the variation in mpg is also explained by its relationship with cylinders: for both manual and automatics, mpg is better with less cylinders.  2D with colors and 3D tell us the same story: transmission is not the only part that drives auto performance.
-
 ### Conslusion 
-Going back to our original research hypothesis formulated as: Ho: $\beta_{transmission}$ = 0 vs. Ha: $\beta_{transmission}$ $\neq$ 0
+Going back to our original research hypothesis formulated as: Ho:$\beta_1$ = 0 vs. Ha:$\beta_1$ != 0
 
-P-value: `r formatC(summary(fit_best)$coefficients[6,4],  digits=6, format="f")`    
+P-value: `r formatC(summary(fit_best)$coefficients[2,4],  digits=6, format="f")`    
 A large p-value indicates that this coefficient is not statistically significant.  We don't have statistical evidence to reject Ho in favor of Ha.  Our data doesn't support the claim of better gas mileage with shift vs. automatic.  Our model suggests more important factors influence fuel-efficiency, such as weight, horse power, and number of cylinders.  It can be argued that these regressors are correlated themselves.  We leave this argument to auto-enthusiasts and subject matter experts in the field.  We only provide this imperical model based on the data.  Speaking of data, our sample is fairly small to generalize the model to the entire car market.  For 2016, the cars in the dataset are pretty outdated - we suspect significant improvements in technology from 1974 may produce a different regression model today. Henderson & Velleman, in "Building Multiple Regression Models Interactively"(1981) suggest a possible bias, choosing a fancy car like Maserati in such a small sample.  
 
 ### Credits and Citations
